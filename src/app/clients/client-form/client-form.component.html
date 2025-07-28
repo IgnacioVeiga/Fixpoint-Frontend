@@ -1,0 +1,34 @@
+<h1>Alta de Cliente</h1>
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div>
+    <label>Nombre</label>
+    <input formControlName="name" required />
+    @if (form.get('name')?.touched && form.get('name')?.invalid) {
+      <span class="error">Nombre requerido (mínimo 3 letras)</span>
+    }
+  </div>
+  <div>
+    <label>DNI</label>
+    <input formControlName="dni" />
+  </div>
+  <div>
+    <label>Teléfono</label>
+    <input formControlName="phone" />
+  </div>
+  <div>
+    <label>Email</label>
+    <input formControlName="email" type="email" />
+    @if (form.get('email')?.touched && form.get('email')?.invalid) {
+      <span class="error">Email inválido</span>
+    }
+  </div>
+  <div>
+    <label>Dirección</label>
+    <input formControlName="address" />
+  </div>
+  <div>
+    <label>Notas</label>
+    <textarea formControlName="notes"></textarea>
+  </div>
+  <button type="submit" [disabled]="form.invalid">Guardar Cliente</button>
+</form>

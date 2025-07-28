@@ -1,0 +1,33 @@
+<h1>Clientes</h1>
+<div class="clients-header">
+  <input type="text" placeholder="Buscar cliente..." [value]="search()" (input)="search.set($any($event.target).value)" />
+  <a [routerLink]="'/clientes/nuevo'" class="btn">+ Nuevo Cliente</a>
+</div>
+<section>
+  <table class="clients-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>DNI</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>Dirección</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (c of filteredClients(); track c.id) {
+        <tr>
+          <td>{{ c.id }}</td>
+          <td>{{ c.name }}</td>
+          <td>{{ c.dni }}</td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.address }}</td>
+          <td><a [routerLink]="['/clientes', c.id]">Ver</a></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>

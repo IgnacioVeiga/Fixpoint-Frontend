@@ -1,0 +1,59 @@
+<h1>Alta de Ticket</h1>
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div>
+    <label>Cliente</label>
+    <select formControlName="clientId" required>
+      <option value="">Seleccionar cliente...</option>
+      @for (c of clients; track c.id) {
+        <option [value]="c.id">{{ c.name }}</option>
+      }
+    </select>
+    @if (form.get('clientId')?.touched && form.get('clientId')?.invalid) {
+      <span class="error">Requerido</span>
+    }
+    <a [routerLink]="'/clientes/nuevo'" class="btn-link">+ Nuevo cliente</a>
+  </div>
+  <div>
+    <label>Tipo de equipo</label>
+    <input formControlName="deviceType" required />
+    @if (form.get('deviceType')?.touched && form.get('deviceType')?.invalid) {
+      <span class="error">Requerido</span>
+    }
+  </div>
+  <div>
+    <label>Marca</label>
+    <input formControlName="brand" />
+  </div>
+  <div>
+    <label>Modelo</label>
+    <input formControlName="model" />
+  </div>
+  <div>
+    <label>N° de serie</label>
+    <input formControlName="serialNumber" />
+  </div>
+  <div>
+    <label>Fecha de ingreso</label>
+    <input type="date" formControlName="entryDate" required />
+  </div>
+  <div>
+    <label>Descripción del problema</label>
+    <textarea formControlName="problemDescription" required></textarea>
+    @if (form.get('problemDescription')?.touched && form.get('problemDescription')?.invalid) {
+      <span class="error">Requerido</span>
+    }
+  </div>
+  <div>
+    <label>Estado</label>
+    <select formControlName="status" required>
+      @for (s of statusOptions; track s.value) {
+        <option [value]="s.value">{{ s.label }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label><input type="checkbox" formControlName="needsContract" /> Requiere contrato</label>
+    <label><input type="checkbox" formControlName="contractSigned" /> Contrato firmado</label>
+  </div>
+  <button type="submit" [disabled]="form.invalid">Guardar Ticket</button>
+</form>

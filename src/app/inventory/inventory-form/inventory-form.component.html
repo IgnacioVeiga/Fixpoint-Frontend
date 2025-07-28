@@ -1,0 +1,42 @@
+<h1>Alta de Componente</h1>
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div>
+    <label>Nombre</label>
+    <input formControlName="name" required />
+    @if (form.get('name')?.touched && form.get('name')?.invalid) {
+      <span class="error">Nombre requerido (mínimo 2 letras)</span>
+    }
+  </div>
+  <div>
+    <label>Tipo</label>
+    <input formControlName="componentType" />
+  </div>
+  <div>
+    <label>Descripción</label>
+    <input formControlName="description" />
+  </div>
+  <div>
+    <label>Condición</label>
+    <select formControlName="condition" required>
+      @for (c of conditions; track c.value) {
+        <option [value]="c.value">{{ c.label }}</option>
+      }
+    </select>
+  </div>
+  <div>
+    <label>Fuente</label>
+    <input formControlName="source" />
+  </div>
+  <div>
+    <label>Cantidad</label>
+    <input type="number" formControlName="quantity" min="1" required />
+    @if (form.get('quantity')?.touched && form.get('quantity')?.invalid) {
+      <span class="error">Cantidad mínima: 1</span>
+    }
+  </div>
+  <div>
+    <label>Ubicación</label>
+    <input formControlName="location" />
+  </div>
+  <button type="submit" [disabled]="form.invalid">Guardar Componente</button>
+</form>

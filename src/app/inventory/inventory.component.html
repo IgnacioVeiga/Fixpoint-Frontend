@@ -1,0 +1,56 @@
+<h1>Inventario</h1>
+<div class="inventory-header">
+  <input
+    type="text"
+    placeholder="Buscar componente..."
+    [value]="search()"
+    (input)="search.set($any($event.target).value)"
+  />
+  <label>Condición:</label>
+  <select
+    [value]="conditionFilter()"
+    (change)="conditionFilter.set($any($event.target).value)"
+  >
+    @for (c of conditions; track c.value) {
+    <option [value]="c.value">{{ c.label }}</option>
+    }
+  </select>
+  <label>Tipo:</label>
+  <input
+    type="text"
+    placeholder="Ej: capacitor, display..."
+    [value]="typeFilter()"
+    (input)="typeFilter.set($any($event.target).value)"
+  />
+  <a [routerLink]="'/inventario/nuevo'" class="btn">+ Nuevo Componente</a>
+</div>
+<section>
+  <table class="inventory-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th>Condición</th>
+        <th>Cantidad</th>
+        <th>Ubicación</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (i of filteredItems(); track i.id) {
+      <tr>
+        <td>{{ i.id }}</td>
+        <td>{{ i.name }}</td>
+        <td>{{ i.componentType }}</td>
+        <td>{{ i.description }}</td>
+        <td>{{ getConditionLabel(i.condition) }}</td>
+        <td>{{ i.quantity }}</td>
+        <td>{{ i.location }}</td>
+        <td><a [routerLink]="['/inventario', i.id]">Ver</a></td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</section>

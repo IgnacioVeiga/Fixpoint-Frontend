@@ -14,6 +14,7 @@ export const routes: Routes = [
     { path: 'tickets/:id', component: TicketFormComponent, title: 'Detalle de Ticket' },
     { path: 'inventario', component: InventoryComponent, title: 'Inventario' },
     { path: 'inventario/nuevo', component: InventoryFormComponent, title: 'Alta de Componente' },
+    { path: 'inventario/:id', component: InventoryFormComponent, title: 'Detalle de Componente' },
     { path: 'clientes', component: ClientsComponent, title: 'Clientes' },
     { path: 'clientes/nuevo', component: ClientFormComponent, title: 'Alta de Cliente' },
     { path: 'clientes/:id', component: ClientFormComponent, title: 'Detalle de Cliente' },

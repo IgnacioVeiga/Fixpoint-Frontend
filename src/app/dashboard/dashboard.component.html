@@ -1,36 +1,5 @@
 <h1>Panel principal</h1>
 <div class="dashboard-header">
-  <label for="estado">Filtrar por estado:</label>
-  <select id="estado" [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
-    @for (est of estados; track est.value) {
-      <option [value]="est.value">{{ est.label }}</option>
-    }
-  </select>
-  <a [routerLink]="'/tickets/nuevo'" class="btn">+ Nuevo Ticket</a>
 </div>
 <section>
-  <table class="tickets-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Equipo</th>
-        <th>Cliente</th>
-        <th>Estado</th>
-        <th>Ingreso</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (t of filteredTickets(); track t.id) {
-        <tr>
-          <td>{{ t.id }}</td>
-          <td>{{ t.deviceType }} {{ t.brand }} {{ t.model }}</td>
-          <td>#{{ t.clientId }}</td>
-          <td>{{ getStatusLabel(t.status) }}</td>
-          <td>{{ t.entryDate }}</td>
-          <td><a [routerLink]="['/tickets', t.id]">Ver</a></td>
-        </tr>
-      }
-    </tbody>
-  </table>
 </section>

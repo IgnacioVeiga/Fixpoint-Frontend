@@ -7,6 +7,4 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
-export class App {
-  protected title = 'Fixpoint';
-}
+export class App { }

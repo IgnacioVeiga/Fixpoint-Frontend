@@ -25,7 +25,10 @@
           <td>{{ c.phone }}</td>
           <td>{{ c.email }}</td>
           <td>{{ c.address }}</td>
-          <td><a [routerLink]="['/clientes', c.id]">Ver</a></td>
+          <td>
+            <a [routerLink]="['/clientes', c.id]">Editar</a>
+            <button class="delete-btn" (click)="deleteClient(c.id)">Eliminar</button>
+          </td>
         </tr>
       }
     </tbody>

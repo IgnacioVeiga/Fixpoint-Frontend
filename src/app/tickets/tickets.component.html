@@ -29,7 +29,10 @@
           <td>#{{ t.clientId }}</td>
           <td>{{ getStatusLabel(t.status) }}</td>
           <td>{{ t.entryDate }}</td>
-          <td><a [routerLink]="['/tickets', t.id]">Ver</a></td>
+          <td>
+            <a [routerLink]="['/tickets', t.id]">Editar</a>
+            <button class="delete-btn" (click)="deleteTicket(t.id)">Eliminar</button>
+          </td>
         </tr>
       }
     </tbody>

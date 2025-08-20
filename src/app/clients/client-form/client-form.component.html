@@ -1,4 +1,8 @@
-<h1>Alta de Cliente</h1>
+@if (isEditing()) {
+  <h1>Editar Cliente</h1>
+} @else {
+  <h1>Alta de Cliente</h1>
+}
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
     <label>Nombre</label>

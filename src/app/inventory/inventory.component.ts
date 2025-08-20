@@ -1,5 +1,7 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { InventoryService } from '../service/inventory.service';
+import { InventoryItem } from '../models/inventory.model';
 
 @Component({
     selector: 'app-inventory',
@@ -9,11 +11,8 @@ import { RouterLink } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryComponent {
-    items = signal([
-        { id: 1, name: 'Capacitor 100uF', componentType: 'capacitor', description: 'Electrolítico', condition: 'new', source: 'comprado', quantity: 10, location: 'Caja A', addedAt: '2025-07-28' },
-        { id: 2, name: 'Display LCD', componentType: 'display', description: '16x2', condition: 'used', source: 'reciclado', quantity: 2, location: 'Estante 2', addedAt: '2025-07-27' },
-        { id: 3, name: 'Placa base TV', componentType: 'board', description: 'Samsung Q60', condition: 'damaged', source: 'donado', quantity: 1, location: 'Caja B', addedAt: '2025-07-26' }
-    ]);
+    private inventory = inject(InventoryService);
+    items = signal<InventoryItem[]>([]);
 
     search = signal('');
     conditionFilter = signal('all');
@@ -43,5 +42,20 @@ export class InventoryComponent {
     getConditionLabel(condition: string): string {
         const found = this.conditions.find(c => c.value === condition);
         return found ? found.label : condition;
+    }
+
+    constructor() {
+        // Carga inicial de items
+        this.inventory.listInventory().subscribe(data => {
+            this.items.set(data);
+        });
+    }
+
+    deleteItem(id: number) {
+        if (confirm('¿Estás seguro de que deseas eliminar este componente?')) {
+            this.inventory.deleteInventory(id).subscribe(() => {
+                this.items.set(this.items().filter(item => item.id !== id));
+            });
+        }
     }
 }

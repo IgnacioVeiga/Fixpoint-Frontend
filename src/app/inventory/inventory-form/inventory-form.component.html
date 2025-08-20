@@ -1,4 +1,8 @@
-<h1>Alta de Componente</h1>
+@if (isEditing()) {
+  <h1>Editar Componente</h1>
+} @else {
+  <h1>Alta de Componente</h1>
+}
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
     <label>Nombre</label>

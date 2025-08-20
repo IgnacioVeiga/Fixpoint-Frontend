@@ -6,7 +6,7 @@ import { Attachment } from '../models/attachment.model';
 @Injectable({ providedIn: 'root' })
 export class AttachmentsService {
   private api = inject(ApiService);
-  private endpoint = '/attachments';
+  private endpoint = 'attachments';
 
   listAttachments(ticketId: number): Observable<Attachment[]> {
     return this.api.get<Attachment[]>(`${this.endpoint}?ticketId=${ticketId}`);

@@ -1,5 +1,7 @@
-import { Component, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TicketsService } from '../service/tickets.service';
+import { Ticket } from '../models/ticket.model';
 
 @Component({
     selector: 'app-tickets',
@@ -9,41 +11,11 @@ import { RouterLink } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TicketsComponent {
-    tickets = signal([
-        {
-            id: 1,
-            clientId: 1,
-            deviceType: 'Televisor',
-            brand: 'Samsung',
-            model: 'Q60',
-            serialNumber: 'SN123',
-            entryDate: '2025-07-28',
-            problemDescription: 'No enciende',
-            status: 'diagnosing',
-            needsContract: false,
-            contractSigned: false,
-            createdBy: 'admin',
-            lastUpdated: '2025-07-28T10:00:00Z'
-        },
-        {
-            id: 2,
-            clientId: 2,
-            deviceType: 'Celular',
-            brand: 'Motorola',
-            model: 'G8',
-            serialNumber: 'SN456',
-            entryDate: '2025-07-27',
-            problemDescription: 'Pantalla rota',
-            status: 'waiting_parts',
-            needsContract: false,
-            contractSigned: false,
-            createdBy: 'admin',
-            lastUpdated: '2025-07-28T09:00:00Z'
-        }
-    ]);
+    private ticketService = inject(TicketsService);
+    tickets = signal<Ticket[]>([]);
 
     search = signal('');
-    statusFilter = signal('all');
+    statusFilter = signal('all'); // 'all' | 'diagnosing' | 'repairing' | 'waiting_parts' | 'repaired'
 
     estados = [
         { value: 'all', label: 'Todos' },
@@ -74,5 +46,20 @@ export class TicketsComponent {
     getStatusLabel(status: string): string {
         const found = this.estados.find(e => e.value === status);
         return found ? found.label : status;
+    }
+
+    constructor() {
+        // Carga inicial de tickets
+        this.ticketService.listTickets().subscribe(data => {
+            this.tickets.set(data);
+        });
+    }
+
+    deleteTicket(id: number) {
+        if (confirm('¿Estás seguro de que deseas eliminar este ticket?')) {
+            this.ticketService.deleteTicket(id).subscribe(() => {
+                this.tickets.set(this.tickets().filter(ticket => ticket.id !== id));
+            });
+        }
     }
 }

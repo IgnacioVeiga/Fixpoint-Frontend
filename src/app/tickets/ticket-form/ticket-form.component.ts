@@ -1,7 +1,9 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Client } from '../../models/client.model';
-import { RouterModule } from '@angular/router';
+import { TicketsService } from '../../service/tickets.service';
+import { ClientsService } from '../../service/clients.service';
 
 @Component({
     selector: 'app-ticket-form',
@@ -12,10 +14,14 @@ import { RouterModule } from '@angular/router';
     imports: [ReactiveFormsModule, RouterModule]
 })
 export class TicketFormComponent {
-    clients: Client[] = [
-        { id: 1, name: 'Juan Pérez', dni: '12345678', phone: '1112345678', email: 'juan@mail.com', address: 'Calle 1', createdAt: '2025-07-28' },
-        { id: 2, name: 'Ana Gómez', dni: '87654321', phone: '1198765432', email: 'ana@mail.com', address: 'Calle 2', createdAt: '2025-07-27' }
-    ];
+    private ticketService = inject(TicketsService);
+    private clientService = inject(ClientsService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+
+    isEditing = signal(false);
+    editingId = signal<number | null>(null);
+    clients = signal<Client[]>([]);
 
     statusOptions = [
         { value: 'received', label: 'Recibido' },
@@ -42,16 +48,47 @@ export class TicketFormComponent {
             needsContract: [false],
             contractSigned: [false]
         });
+
+        // Cargar clientes
+        this.clientService.listClients().subscribe(data => {
+            this.clients.set(data);
+        });
+
+        // Check if we're editing
+        const id = this.route.snapshot.params['id'];
+        if (id && id !== 'nuevo') {
+            this.isEditing.set(true);
+            this.editingId.set(Number(id));
+            this.ticketService.getTicket(Number(id)).subscribe(ticket => {
+                this.form.patchValue(ticket);
+            });
+        }
     }
 
     get clientName() {
         const id = this.form.get('clientId')?.value;
-        return this.clients.find(c => c.id === id)?.name || '';
+        return this.clients()?.find((c: Client) => c.id === id)?.name || '';
     }
 
     submit() {
         if (this.form.valid) {
-            alert('Ticket guardado: ' + JSON.stringify(this.form.value, null, 2));
+            if (this.isEditing()) {
+                const id = this.editingId()!;
+                this.ticketService.updateTicket(id, {
+                    ...this.form.value,
+                    id,
+                    lastUpdated: new Date().toISOString()
+                }).subscribe(() => {
+                    this.router.navigate(['/tickets']);
+                });
+            } else {
+                this.ticketService.createTicket({
+                    ...this.form.value,
+                    lastUpdated: new Date().toISOString()
+                }).subscribe(() => {
+                    this.router.navigate(['/tickets']);
+                });
+            }
         } else {
             this.form.markAllAsTouched();
         }

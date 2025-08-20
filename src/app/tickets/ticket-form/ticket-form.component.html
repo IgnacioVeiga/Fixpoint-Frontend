@@ -1,10 +1,14 @@
-<h1>Alta de Ticket</h1>
+@if (isEditing()) {
+  <h1>Editar Ticket</h1>
+} @else {
+  <h1>Alta de Ticket</h1>
+}
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
     <label>Cliente</label>
     <select formControlName="clientId" required>
       <option value="">Seleccionar cliente...</option>
-      @for (c of clients; track c.id) {
+      @for (c of clients(); track c.id) {
         <option [value]="c.id">{{ c.name }}</option>
       }
     </select>

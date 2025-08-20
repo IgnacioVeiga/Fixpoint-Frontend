@@ -1,5 +1,7 @@
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ClientsService } from '../service/clients.service';
+import { Client } from '../models/client.model';
 
 @Component({
     selector: 'app-clients',
@@ -9,11 +11,8 @@ import { RouterLink } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientsComponent {
-    clients = signal([
-        { id: 1, name: 'Juan Pérez', dni: '12345678', phone: '1112345678', email: 'juan@mail.com', address: 'Calle 1', createdAt: '2025-07-28' },
-        { id: 2, name: 'Ana Gómez', dni: '87654321', phone: '1198765432', email: 'ana@mail.com', address: 'Calle 2', createdAt: '2025-07-27' },
-        { id: 3, name: 'Carlos Ruiz', dni: '11223344', phone: '1133344455', email: 'carlos@mail.com', address: 'Calle 3', createdAt: '2025-07-26' }
-    ]);
+    private clientService = inject(ClientsService);
+    clients = signal<Client[]>([]);
 
     search = signal('');
 
@@ -27,4 +26,19 @@ export class ClientsComponent {
             c.email?.toLowerCase().includes(search)
         );
     };
+
+    constructor() {
+        // Carga inicial de clientes
+        this.clientService.listClients().subscribe(data => {
+            this.clients.set(data);
+        });
+    }
+
+    deleteClient(id: number) {
+        if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
+            this.clientService.deleteClient(id).subscribe(() => {
+                this.clients.set(this.clients().filter(client => client.id !== id));
+            });
+        }
+    }
 }

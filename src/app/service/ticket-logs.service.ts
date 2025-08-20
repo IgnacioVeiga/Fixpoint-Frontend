@@ -6,7 +6,7 @@ import { TicketLog } from '../models/ticket-log.model';
 @Injectable({ providedIn: 'root' })
 export class TicketLogsService {
   private api = inject(ApiService);
-  private endpoint = '/ticketlogs';
+  private endpoint = 'ticketlogs';
 
   listTicketLogs(ticketId: number): Observable<TicketLog[]> {
     return this.api.get<TicketLog[]>(`${this.endpoint}?ticketId=${ticketId}`);

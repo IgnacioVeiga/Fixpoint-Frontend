@@ -48,7 +48,10 @@
         <td>{{ getConditionLabel(i.condition) }}</td>
         <td>{{ i.quantity }}</td>
         <td>{{ i.location }}</td>
-        <td><a [routerLink]="['/inventario', i.id]">Ver</a></td>
+        <td>
+          <a [routerLink]="['/inventario', i.id]">Editar</a>
+          <button class="delete-btn" (click)="deleteItem(i.id)">Eliminar</button>
+        </td>
       </tr>
       }
     </tbody>

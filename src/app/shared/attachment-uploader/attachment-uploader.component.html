@@ -1,0 +1,75 @@
+<div
+  class="attachment-uploader"
+  [class.drag-over]="dragOver()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  <div class="upload-zone">
+    <input
+      type="file"
+      #fileInput
+      multiple
+      [accept]="acceptedFileTypes"
+      (change)="onFileSelected($event)"
+      class="file-input"
+    />
+    <div class="upload-message">
+      <span class="upload-icon">📤</span>
+      <p>
+        Arrastra archivos aquí o
+        <button class="browse-btn" (click)="fileInput.click()">
+          selecciona archivos
+        </button>
+      </p>
+      <p class="upload-info">
+        Formatos permitidos: @for (type of allowedTypes; track type) {
+        <span class="file-type">{{ fileTypes[type].icon }} {{ type }}</span>
+        }
+      </p>
+      <p class="size-info">
+        Tamaño máximo por archivo: {{ formatFileSize(maxFileSize) }}
+      </p>
+    </div>
+  </div>
+
+  @if (uploading()) {
+  <div class="upload-progress">
+    <div class="spinner"></div>
+    <span>Subiendo archivos...</span>
+  </div>
+  } @if (attachments().length > 0) {
+  <div class="attachments-list">
+    @for (attachment of attachments(); track attachment.id) {
+    <div class="attachment-item" (click)="previewFile(attachment)">
+      <span class="attachment-icon">
+        {{ fileTypes[attachment.fileType].icon }}
+      </span>
+      <div class="attachment-info">
+        <span class="attachment-name">{{ attachment.filename }}</span>
+        <span class="attachment-meta">
+          {{ formatFileSize(1024 * 1024) }} •
+          {{ attachment.uploadedAt | date : "dd/MM/yyyy HH:mm" }}
+        </span>
+      </div>
+      <button class="delete-btn" (click)="deleteAttachment(attachment, $event)">
+        ❌
+      </button>
+    </div>
+    }
+  </div>
+  }
+</div>
+
+@if (currentPreview()) {
+<div class="preview-modal" (click)="closePreview()">
+  <div class="preview-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closePreview()">✕</button>
+    @if (currentPreview()!.type === 'pdf') {
+    <iframe [src]="currentPreview()!.url" frameborder="0"></iframe>
+    } @else {
+    <img [src]="currentPreview()!.url" alt="Preview" />
+    }
+  </div>
+</div>
+}

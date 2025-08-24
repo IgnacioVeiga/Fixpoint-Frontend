@@ -8,7 +8,6 @@ import { Attachment, AttachmentType } from '../../models/attachment.model';
     templateUrl: './attachment-uploader.component.html',
     styleUrls: ['./attachment-uploader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [CommonModule]
 })
 export class AttachmentUploaderComponent {

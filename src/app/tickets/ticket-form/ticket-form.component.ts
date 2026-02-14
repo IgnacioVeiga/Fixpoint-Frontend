@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -6,7 +6,7 @@ import { Client } from '../../models/client.model';
 import { InventoryItem } from '../../models/inventory.model';
 import { CreateTicketLogRequest, TicketLog } from '../../models/ticket-log.model';
 import { AddTicketPartRequest, TicketPart } from '../../models/ticket-part.model';
-import { SaveTicketRequest } from '../../models/ticket.model';
+import { SaveTicketRequest, TicketStatus, TicketStatusDefinition } from '../../models/ticket.model';
 import { AttachmentUploaderComponent } from '../../shared/attachment-uploader/attachment-uploader.component';
 import { ClientsService } from '../../service/clients.service';
 import { InventoryService } from '../../service/inventory.service';
@@ -14,6 +14,18 @@ import { TicketLogsService } from '../../service/ticket-logs.service';
 import { TicketPartsService } from '../../service/ticket-parts.service';
 import { TicketsService } from '../../service/tickets.service';
 import { LocaleDateService } from '../../service/locale-date.service';
+
+type StatusOption = { value: TicketStatus; label: string };
+
+const STATUS_LABELS: Record<TicketStatus, string> = {
+  received: 'Recibido',
+  diagnosing: 'Diagnostico',
+  waiting_parts: 'Esperando repuesto',
+  repairing: 'En reparacion',
+  repaired: 'Finalizado',
+  returned: 'Devuelto',
+  cancelled: 'Cancelado'
+};
 
 @Component({
   selector: 'app-ticket-form',
@@ -41,16 +53,14 @@ export class TicketFormComponent {
   readonly inventoryItems = signal<InventoryItem[]>([]);
   readonly ticketLogs = signal<TicketLog[]>([]);
   readonly ticketParts = signal<TicketPart[]>([]);
-
-  readonly statusOptions = [
-    { value: 'received', label: 'Recibido' },
-    { value: 'diagnosing', label: 'Diagnóstico' },
-    { value: 'waiting_parts', label: 'Esperando repuesto' },
-    { value: 'repairing', label: 'En reparación' },
-    { value: 'repaired', label: 'Finalizado' },
-    { value: 'returned', label: 'Devuelto' },
-    { value: 'cancelled', label: 'Cancelado' }
-  ];
+  readonly statusDefinitions = signal<TicketStatusDefinition[]>(this.fallbackStatusDefinitions());
+  readonly currentTicketStatus = signal<TicketStatus | null>(null);
+  readonly statusOptions = computed<StatusOption[]>(() =>
+    this.resolveVisibleStatuses().map((status) => ({
+      value: status.value,
+      label: STATUS_LABELS[status.value]
+    }))
+  );
 
   readonly form: FormGroup = this.formBuilder.group({
     clientId: [null, Validators.required],
@@ -78,6 +88,7 @@ export class TicketFormComponent {
   });
 
   constructor() {
+    this.loadStatusDefinitions();
     this.loadClients();
     this.loadInventory();
     this.loadCurrentTicketIfNeeded();
@@ -195,7 +206,11 @@ export class TicketFormComponent {
     this.editingId.set(ticketId);
 
     this.ticketService.getTicket(ticketId).subscribe({
-      next: (ticket) => this.form.patchValue(ticket),
+      next: (ticket) => {
+        this.form.patchValue(ticket);
+        this.currentTicketStatus.set(ticket.status);
+        this.ensureStatusValueIsValid();
+      },
       error: (error) => {
         console.error('Error al cargar ticket:', error);
         alert(this.extractErrorMessage(error, 'No se pudo cargar el ticket.'));
@@ -226,6 +241,22 @@ export class TicketFormComponent {
     });
   }
 
+  private loadStatusDefinitions(): void {
+    this.ticketService.listStatusDefinitions().subscribe({
+      next: (definitions) => {
+        this.statusDefinitions.set(
+          definitions.length > 0 ? definitions : this.fallbackStatusDefinitions()
+        );
+        this.ensureStatusValueIsValid();
+      },
+      error: (error) => {
+        console.error('Error al cargar estados de ticket:', error);
+        this.statusDefinitions.set(this.fallbackStatusDefinitions());
+        this.ensureStatusValueIsValid();
+      }
+    });
+  }
+
   private loadTicketLogs(ticketId: number): void {
     this.ticketLogService.listTicketLogs(ticketId).subscribe({
       next: (logs) => this.ticketLogs.set(logs),
@@ -246,6 +277,53 @@ export class TicketFormComponent {
     });
   }
 
+  private resolveVisibleStatuses(): TicketStatusDefinition[] {
+    const definitions = this.statusDefinitions();
+    if (!this.isEditing()) {
+      return definitions;
+    }
+
+    const currentStatus = this.currentTicketStatus();
+    if (!currentStatus) {
+      return definitions;
+    }
+
+    const currentDefinition = definitions.find((definition) => definition.value === currentStatus);
+    if (!currentDefinition) {
+      return definitions;
+    }
+
+    const allowedStatuses = new Set<TicketStatus>([
+      currentStatus,
+      ...currentDefinition.nextStatuses
+    ]);
+    return definitions.filter((definition) => allowedStatuses.has(definition.value));
+  }
+
+  private ensureStatusValueIsValid(): void {
+    const currentValue = this.form.get('status')?.value as TicketStatus | null;
+    const options = this.statusOptions();
+
+    if (currentValue && options.some((option) => option.value === currentValue)) {
+      return;
+    }
+
+    const fallback = options[0]?.value ?? 'received';
+    this.form.patchValue({ status: fallback }, { emitEvent: false });
+  }
+
+  private fallbackStatusDefinitions(): TicketStatusDefinition[] {
+    return [
+      { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+      { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+      { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+      { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+      { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+      { value: 'returned', closed: true, nextStatuses: [] },
+      { value: 'cancelled', closed: true, nextStatuses: [] }
+    ];
+  }
+
   private toTicketPayload(): SaveTicketRequest {
     return {
       clientId: Number(this.form.value.clientId),
@@ -255,7 +333,7 @@ export class TicketFormComponent {
       serialNumber: String(this.form.value.serialNumber ?? '').trim() || undefined,
       entryDate: String(this.form.value.entryDate ?? ''),
       problemDescription: String(this.form.value.problemDescription ?? '').trim() || undefined,
-      status: this.form.value.status,
+      status: this.form.value.status as TicketStatus,
       needsContract: Boolean(this.form.value.needsContract),
       contractSigned: Boolean(this.form.value.contractSigned),
       createdBy: String(this.form.value.createdBy ?? '').trim() || undefined

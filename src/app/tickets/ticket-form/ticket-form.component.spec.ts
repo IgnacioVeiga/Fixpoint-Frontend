@@ -4,7 +4,7 @@ import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { Client } from '../../models/client.model';
 import { InventoryItem } from '../../models/inventory.model';
-import { Ticket } from '../../models/ticket.model';
+import { Ticket, TicketStatusDefinition } from '../../models/ticket.model';
 import { ClientsService } from '../../service/clients.service';
 import { InventoryService } from '../../service/inventory.service';
 import { LocaleDateService } from '../../service/locale-date.service';
@@ -59,8 +59,21 @@ describe('TicketFormComponent', () => {
     lastUpdated: '2026-02-14T11:00:00'
   };
 
+  const statusDefinitions: TicketStatusDefinition[] = [
+    { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+    { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+    { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+    { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+    { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+    { value: 'returned', closed: true, nextStatuses: [] },
+    { value: 'cancelled', closed: true, nextStatuses: [] }
+  ];
+
   function configureTestingModule(routeParams: Record<string, string>) {
-    ticketServiceSpy = jasmine.createSpyObj<TicketsService>('TicketsService', ['getTicket', 'createTicket', 'updateTicket']);
+    ticketServiceSpy = jasmine.createSpyObj<TicketsService>(
+      'TicketsService',
+      ['getTicket', 'createTicket', 'updateTicket', 'listStatusDefinitions']
+    );
     clientServiceSpy = jasmine.createSpyObj<ClientsService>('ClientsService', ['listClients']);
     inventoryServiceSpy = jasmine.createSpyObj<InventoryService>('InventoryService', ['listInventory']);
     ticketLogsServiceSpy = jasmine.createSpyObj<TicketLogsService>('TicketLogsService', ['listTicketLogs', 'createTicketLog']);
@@ -71,6 +84,7 @@ describe('TicketFormComponent', () => {
     inventoryServiceSpy.listInventory.and.returnValue(of([inventoryItem]));
     ticketLogsServiceSpy.listTicketLogs.and.returnValue(of([]));
     ticketPartsServiceSpy.listTicketParts.and.returnValue(of([]));
+    ticketServiceSpy.listStatusDefinitions.and.returnValue(of(statusDefinitions));
     ticketServiceSpy.getTicket.and.returnValue(of(createdTicket));
     ticketServiceSpy.createTicket.and.returnValue(of(createdTicket));
     ticketServiceSpy.updateTicket.and.returnValue(of(createdTicket));
@@ -112,6 +126,7 @@ describe('TicketFormComponent', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
+    expect(ticketServiceSpy.listStatusDefinitions).toHaveBeenCalled();
     component.form.patchValue({
       clientId: client.id,
       deviceType: 'Laptop',
@@ -139,6 +154,7 @@ describe('TicketFormComponent', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
+    expect(ticketServiceSpy.listStatusDefinitions).toHaveBeenCalled();
     expect(component.isEditing()).toBeTrue();
     expect(component.editingId()).toBe(55);
     expect(ticketServiceSpy.getTicket).toHaveBeenCalledWith(55);

@@ -34,7 +34,7 @@
     <div class="field">
       <label for="estado">Estado</label>
       <select id="estado" [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
-        @for (est of estados; track est.value) {
+        @for (est of estados(); track est.value) {
           <option [value]="est.value">{{ est.label }}</option>
         }
       </select>

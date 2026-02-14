@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
-import { Ticket } from '../models/ticket.model';
+import { Ticket, TicketStatusDefinition } from '../models/ticket.model';
 import { TicketsService } from '../service/tickets.service';
 import { TicketsComponent } from './tickets.component';
 
@@ -25,8 +25,22 @@ describe('TicketsComponent', () => {
     lastUpdated: '2026-02-14T10:00:00'
   };
 
+  const statusDefinitions: TicketStatusDefinition[] = [
+    { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+    { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+    { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+    { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+    { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+    { value: 'returned', closed: true, nextStatuses: [] },
+    { value: 'cancelled', closed: true, nextStatuses: [] }
+  ];
+
   beforeEach(async () => {
-    ticketServiceSpy = jasmine.createSpyObj<TicketsService>('TicketsService', ['listTickets', 'deleteTicket']);
+    ticketServiceSpy = jasmine.createSpyObj<TicketsService>(
+      'TicketsService',
+      ['listTickets', 'deleteTicket', 'listStatusDefinitions']
+    );
+    ticketServiceSpy.listStatusDefinitions.and.returnValue(of(statusDefinitions));
 
     await TestBed.configureTestingModule({
       imports: [TicketsComponent],
@@ -45,6 +59,7 @@ describe('TicketsComponent', () => {
     const fixture = TestBed.createComponent(TicketsComponent);
     fixture.detectChanges();
 
+    expect(ticketServiceSpy.listStatusDefinitions).toHaveBeenCalled();
     expect(fixture.componentInstance.loading()).toBeTrue();
     expect(fixture.nativeElement.textContent).toContain('Loading data...');
 
@@ -65,6 +80,7 @@ describe('TicketsComponent', () => {
     const fixture = TestBed.createComponent(TicketsComponent);
     fixture.detectChanges();
 
+    expect(ticketServiceSpy.listStatusDefinitions).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('Load failed');
     const retryButton = fixture.nativeElement.querySelector('.btn-inline') as HTMLButtonElement;
     expect(retryButton).toBeTruthy();

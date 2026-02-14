@@ -33,11 +33,11 @@
 }
 
 .ticket-section {
-  background: #fff;
-  border: 1px solid #d4dfdb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.95rem;
-  box-shadow: 0 8px 22px rgba(10, 26, 24, 0.08);
+  box-shadow: var(--shadow);
 }
 
 .ticket-section h2 {

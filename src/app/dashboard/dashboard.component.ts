@@ -144,15 +144,15 @@ export class DashboardComponent {
     // Calcular el color para cada estado de ticket
     getStatusColor(status: string): string {
         const colors: { [key: string]: string } = {
-            'received': '#64B5F6',    // Azul claro
-            'diagnosing': '#FFB74D',  // Naranja claro
-            'waiting_parts': '#81C784', // Verde claro
-            'repairing': '#FF8A65',   // Rojo claro
-            'repaired': '#4CAF50',    // Verde
-            'returned': '#9575CD',     // Violeta
-            'cancelled': '#E57373'     // Rojo
+            'received': '#86cecb',
+            'diagnosing': '#9ed8d5',
+            'waiting_parts': '#e12885',
+            'repairing': '#137a7f',
+            'repaired': '#59b7b3',
+            'returned': '#5f7f8a',
+            'cancelled': '#b55d8e'
         };
-        return colors[status] || '#999';
+        return colors[status] || '#86cecb';
     }
 
     getStatusLabel(status: string): string {

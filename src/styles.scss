@@ -1,18 +1,76 @@
 :root {
-    --bg: #f1f5f3;
-    --bg-soft: #e6efeb;
-    --surface: #ffffff;
-    --surface-soft: #f8fbfa;
-    --text: #15201d;
-    --text-muted: #576864;
-    --border: #d4dfdb;
-    --primary: #1f6f62;
-    --primary-strong: #17574d;
-    --primary-soft: #d4ece7;
-    --danger: #b53e3e;
-    --danger-strong: #953333;
-    --shadow: 0 8px 22px rgba(10, 26, 24, 0.08);
+    color-scheme: light;
+    --bg: #bec8d1;
+    --bg-soft: #d7dee5;
+    --bg-radial: #eef6f5;
+    --surface: #f8fbfc;
+    --surface-soft: #eaf1f4;
+    --text: #373b3e;
+    --text-muted: #5d6872;
+    --border: #a4b3bf;
+    --primary: #137a7f;
+    --primary-strong: #0f666a;
+    --primary-soft: #86cecb;
+    --accent: #e12885;
+    --accent-soft: #f7d2e8;
+    --danger: #e12885;
+    --danger-strong: #bc216f;
+    --nav-bg: rgba(248, 251, 252, 0.9);
+    --table-row-hover: #edf8f8;
+    --focus-ring: rgba(19, 122, 127, 0.24);
+    --shadow: 0 8px 22px rgba(55, 59, 62, 0.16);
+    --status-diagnosing-bg: #f8ecce;
+    --status-diagnosing-text: #7c5f2f;
+    --status-repairing-bg: #d4ecef;
+    --status-repairing-text: #1b5f64;
+    --status-waiting-bg: #f9dfec;
+    --status-waiting-text: #7a2d56;
+    --status-repaired-bg: #d5efe9;
+    --status-repaired-text: #1b5d50;
+    --status-received-bg: #dde8f0;
+    --status-received-text: #2f4f69;
+    --status-returned-bg: #d2f1f0;
+    --status-returned-text: #1f5e60;
+    --status-cancelled-bg: #f3d9e6;
+    --status-cancelled-text: #6c2f50;
     --radius: 12px;
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+    --bg: #373b3e;
+    --bg-soft: #2d3134;
+    --bg-radial: #4a5157;
+    --surface: #2f3438;
+    --surface-soft: #3a4045;
+    --text: #bec8d1;
+    --text-muted: #9ba8b4;
+    --border: #4f5a63;
+    --primary: #86cecb;
+    --primary-strong: #67c2be;
+    --primary-soft: #137a7f;
+    --accent: #e12885;
+    --accent-soft: #5c2547;
+    --danger: #e12885;
+    --danger-strong: #c12274;
+    --nav-bg: rgba(47, 52, 56, 0.9);
+    --table-row-hover: #3a4045;
+    --focus-ring: rgba(134, 206, 203, 0.35);
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+    --status-diagnosing-bg: #675734;
+    --status-diagnosing-text: #f3ddb2;
+    --status-repairing-bg: #1f4a4d;
+    --status-repairing-text: #bceceb;
+    --status-waiting-bg: #612f4c;
+    --status-waiting-text: #ffd2ea;
+    --status-repaired-bg: #1f5649;
+    --status-repaired-text: #bce8dd;
+    --status-received-bg: #2d465a;
+    --status-received-text: #d0e7f8;
+    --status-returned-bg: #1f5b5d;
+    --status-returned-text: #c5f4f3;
+    --status-cancelled-bg: #5a2d44;
+    --status-cancelled-text: #ffd7e9;
 }
 
 *,
@@ -31,7 +89,7 @@ body {
     font-family: "IBM Plex Sans", "Trebuchet MS", "Segoe UI", sans-serif;
     color: var(--text);
     background:
-        radial-gradient(circle at 0% 0%, #ffffff 0%, transparent 52%),
+        radial-gradient(circle at 0% 0%, var(--bg-radial) 0%, transparent 52%),
         linear-gradient(150deg, var(--bg-soft), var(--bg));
 }
 
@@ -74,6 +132,9 @@ p {
 
 .topbar-badges {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
     gap: 0.5rem;
 }
 
@@ -86,18 +147,43 @@ p {
 }
 
 .badge-env {
-    background: #dce8ff;
-    color: #244576;
+    background: var(--primary-soft);
+    color: var(--primary-strong);
 }
 
 .badge-real {
-    background: #d7f2e0;
-    color: #185634;
+    background: #cdeedd;
+    color: #205f45;
 }
 
 .badge-mock {
-    background: #ffeccc;
-    color: #8c4d15;
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+:root[data-theme='dark'] .badge-real {
+    background: #294b3d;
+    color: #b9ebd2;
+}
+
+.theme-toggle {
+    border: 1px solid var(--primary);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--primary-strong);
+    padding: 0.22rem 0.68rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+}
+
+.theme-toggle:hover {
+    background: var(--primary-soft);
+}
+
+:root[data-theme='dark'] .theme-toggle {
+    color: var(--primary);
 }
 
 .main-nav {
@@ -105,7 +191,7 @@ p {
     flex-wrap: wrap;
     gap: 0.45rem;
     padding: 0.65rem 1rem;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--nav-bg);
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(3px);
 }
@@ -127,7 +213,7 @@ p {
 .main-nav .quick-link {
     margin-left: auto;
     background: var(--primary);
-    color: #fff;
+    color: var(--bg);
 }
 
 .app-content {
@@ -191,7 +277,7 @@ input:focus,
 select:focus,
 textarea:focus {
     border-color: var(--primary);
-    outline: 2px solid rgba(31, 111, 98, 0.15);
+    outline: 2px solid var(--focus-ring);
 }
 
 textarea {
@@ -245,7 +331,7 @@ th {
 }
 
 tr:hover td {
-    background: #f8fcfb;
+    background: var(--table-row-hover);
 }
 
 tbody tr:last-child td {
@@ -270,7 +356,7 @@ tbody tr:last-child td {
     text-decoration: none;
     font-weight: 700;
     background: var(--primary);
-    color: #fff;
+    color: var(--bg);
     cursor: pointer;
 }
 
@@ -299,7 +385,7 @@ tbody tr:last-child td {
     border: none;
     border-radius: 8px;
     background: var(--danger);
-    color: #fff;
+    color: var(--bg);
     padding: 0.35rem 0.6rem;
     cursor: pointer;
     font-weight: 600;
@@ -319,38 +405,38 @@ tbody tr:last-child td {
 }
 
 .status-diagnosing {
-    background: #f7e8ca;
-    color: #8b6120;
+    background: var(--status-diagnosing-bg);
+    color: var(--status-diagnosing-text);
 }
 
 .status-repairing {
-    background: #dbeafc;
-    color: #204f8c;
+    background: var(--status-repairing-bg);
+    color: var(--status-repairing-text);
 }
 
 .status-waiting_parts {
-    background: #f5dfd2;
-    color: #8d4d2c;
+    background: var(--status-waiting-bg);
+    color: var(--status-waiting-text);
 }
 
 .status-repaired {
-    background: #d8f3de;
-    color: #236337;
+    background: var(--status-repaired-bg);
+    color: var(--status-repaired-text);
 }
 
 .status-received {
-    background: #e8e8f7;
-    color: #4b4b83;
+    background: var(--status-received-bg);
+    color: var(--status-received-text);
 }
 
 .status-returned {
-    background: #d5eff4;
-    color: #1e5a66;
+    background: var(--status-returned-bg);
+    color: var(--status-returned-text);
 }
 
 .status-cancelled {
-    background: #f6dbdb;
-    color: #8c2f2f;
+    background: var(--status-cancelled-bg);
+    color: var(--status-cancelled-text);
 }
 
 .error {

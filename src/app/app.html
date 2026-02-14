@@ -8,6 +8,9 @@
     <span class="badge" [class.badge-mock]="mockMode" [class.badge-real]="!mockMode">
       {{ mockMode ? 'Modo Mock' : 'Backend Real' }}
     </span>
+    <button class="theme-toggle" type="button" (click)="toggleTheme()">
+      {{ isDarkTheme ? 'Dark mode' : 'Light mode' }}
+    </button>
   </div>
 </header>
 

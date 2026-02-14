@@ -4,6 +4,8 @@ import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
+    localStorage.removeItem('fixpoint-theme');
+
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [provideZonelessChangeDetection()]
@@ -21,5 +23,20 @@ describe('App', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.main-nav')).toBeTruthy();
+  });
+
+  it('should toggle and apply theme to document root', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    const app = fixture.componentInstance;
+    const initialTheme = app.theme;
+    const button = fixture.nativeElement.querySelector('.theme-toggle') as HTMLButtonElement;
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(app.theme).not.toBe(initialTheme);
+    expect(document.documentElement.getAttribute('data-theme')).toBe(app.theme);
   });
 });

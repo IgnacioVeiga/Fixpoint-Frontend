@@ -1,0 +1,46 @@
+.auth-shell {
+  min-height: min(72vh, 640px);
+  display: grid;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 1.3rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.auth-header h1 {
+  font-size: 1.32rem;
+}
+
+.auth-header p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.auth-submit {
+  width: 100%;
+}
+
+.auth-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .auth-shell {
+    min-height: auto;
+  }
+}

@@ -44,6 +44,11 @@ Run configurations compartidas en `.run/`:
 
 - En `mock`, los servicios usan fallback local (`useMockFallback: true`).
 - En `dev/qa/prod`, consume backend real vía `apiBaseUrl`.
+- The app now uses token-based auth:
+  - Login route: `/login`
+  - Protected routes: dashboard, tickets, inventory, clients
+  - HTTP interceptor adds `Authorization: Bearer <token>` for backend API calls
+- In `mock`, login is local and does not require a backend user.
 
 ## Unit tests included
 
@@ -52,6 +57,10 @@ Run configurations compartidas en `.run/`:
 - `tickets.component.spec.ts`: loading/error/retry component behavior.
 - `clients.component.spec.ts`: retry flow after list load failure.
 - `locale-date.service.spec.ts`: locale-aware date formatting behavior.
+- `auth-session.service.spec.ts`: token/session persistence and expiration handling.
+- `auth.service.spec.ts`: login and logout behavior.
+- `auth.guard.spec.ts`: protected/guest route behavior.
+- `auth.interceptor.spec.ts`: auth header injection and unauthorized handling.
 
 For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).
 

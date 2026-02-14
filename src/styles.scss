@@ -161,6 +161,11 @@ p {
     color: var(--accent);
 }
 
+.badge-user {
+    background: var(--surface-soft);
+    color: var(--text);
+}
+
 :root[data-theme='dark'] .badge-real {
     background: #294b3d;
     color: #b9ebd2;
@@ -184,6 +189,26 @@ p {
 
 :root[data-theme='dark'] .theme-toggle {
     color: var(--primary);
+}
+
+.session-btn,
+.session-link {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text);
+    padding: 0.22rem 0.68rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.session-btn:hover,
+.session-link:hover {
+    border-color: var(--primary);
+    color: var(--primary-strong);
 }
 
 .main-nav {
@@ -220,6 +245,11 @@ p {
     max-width: 1180px;
     margin: 1.4rem auto 2rem;
     padding: 0 1rem;
+}
+
+.app-content-auth {
+    max-width: 880px;
+    margin-top: 2rem;
 }
 
 .page-head {

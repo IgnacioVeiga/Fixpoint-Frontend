@@ -1,14 +1,16 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     localStorage.removeItem('fixpoint-theme');
+    localStorage.removeItem('fixpoint-auth-session');
 
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideZonelessChangeDetection()]
+      providers: [provideZonelessChangeDetection(), provideRouter([])]
     }).compileComponents();
   });
 
@@ -18,10 +20,29 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render main navigation', () => {
+  it('should hide main navigation when user is not authenticated', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.main-nav')).toBeNull();
+  });
+
+  it('should render main navigation when session is active', () => {
+    localStorage.setItem(
+      'fixpoint-auth-session',
+      JSON.stringify({
+        tokenType: 'Bearer',
+        accessToken: 'token-123',
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        username: 'tech-user',
+        role: 'TECH'
+      })
+    );
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
     expect(compiled.querySelector('.main-nav')).toBeTruthy();
   });
 

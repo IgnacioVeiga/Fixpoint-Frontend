@@ -38,5 +38,16 @@ describe('App', () => {
 
     expect(app.theme).not.toBe(initialTheme);
     expect(document.documentElement.getAttribute('data-theme')).toBe(app.theme);
+    expect(localStorage.getItem('fixpoint-theme')).toBe(app.theme);
+  });
+
+  it('should initialize using saved theme from localStorage', () => {
+    localStorage.setItem('fixpoint-theme', 'dark');
+
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.theme).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });

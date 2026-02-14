@@ -49,9 +49,12 @@ Run configurations compartidas en `.run/`:
 
 - `api.service.spec.ts`: URL resolution and query params normalization.
 - `tickets.service.spec.ts`: service behavior with mocked `ApiService`.
+- `tickets.component.spec.ts`: loading/error/retry component behavior.
+- `clients.component.spec.ts`: retry flow after list load failure.
+- `locale-date.service.spec.ts`: locale-aware date formatting behavior.
 
 For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).
 
 ## CI
 
-GitHub Actions workflow: `.github/workflows/ci.yml` installs Chrome, runs unit tests, and builds the app on push/PR.
+GitHub Actions workflow: `.github/workflows/ci.yml` installs Chrome, runs unit tests, and builds the app only on commits to `main`.

@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { Attachment, AttachmentType } from '../../models/attachment.model';
 import { AttachmentsService } from '../../service/attachments.service';
+import { LocaleDateService } from '../../service/locale-date.service';
 
 @Component({
   selector: 'app-attachment-uploader',
@@ -38,7 +39,10 @@ export class AttachmentUploaderComponent implements OnChanges {
   readonly uploading = signal(false);
   readonly dragOver = signal(false);
 
-  constructor(private readonly attachmentService: AttachmentsService) {}
+  constructor(
+    private readonly attachmentService: AttachmentsService,
+    private readonly localeDate: LocaleDateService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['ticketId']) {
@@ -119,6 +123,10 @@ export class AttachmentUploaderComponent implements OnChanges {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  formatAttachmentDate(value: string): string {
+    return this.localeDate.formatDateTime(value);
   }
 
   private loadAttachments(): void {

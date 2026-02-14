@@ -1,7 +1,9 @@
 import { Component, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { TicketsService } from '../service/tickets.service';
 import { Ticket } from '../models/ticket.model';
+import { LocaleDateService } from '../service/locale-date.service';
 
 @Component({
     selector: 'app-tickets',
@@ -12,7 +14,10 @@ import { Ticket } from '../models/ticket.model';
 })
 export class TicketsComponent {
     private ticketService = inject(TicketsService);
+    private readonly localeDate = inject(LocaleDateService);
     tickets = signal<Ticket[]>([]);
+    loading = signal(true);
+    loadError = signal<string | null>(null);
 
     search = signal('');
     statusFilter = signal('all'); // 'all' | 'diagnosing' | 'repairing' | 'waiting_parts' | 'repaired'
@@ -49,18 +54,15 @@ export class TicketsComponent {
     }
 
     formatEntryDate(value: string): string {
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            const [year, month, day] = value.split('-').map(Number);
-            return new Date(year, month - 1, day).toLocaleDateString();
-        }
-        return new Date(value).toLocaleDateString();
+        return this.localeDate.formatDateOnly(value);
     }
 
     constructor() {
-        // Carga inicial de tickets
-        this.ticketService.listTickets().subscribe(data => {
-            this.tickets.set(data);
-        });
+        this.loadTickets();
+    }
+
+    retryLoad(): void {
+        this.loadTickets();
     }
 
     deleteTicket(id: number) {
@@ -85,5 +87,21 @@ export class TicketsComponent {
             }
         }
         return fallback;
+    }
+
+    private loadTickets(): void {
+        this.loading.set(true);
+        this.loadError.set(null);
+
+        this.ticketService.listTickets()
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: (data) => this.tickets.set(data),
+                error: (error) => {
+                    console.error('Error loading tickets:', error);
+                    this.tickets.set([]);
+                    this.loadError.set(this.extractErrorMessage(error, 'Unable to load tickets.'));
+                }
+            });
     }
 }

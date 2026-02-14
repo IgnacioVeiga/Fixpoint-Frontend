@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { MOCK_DASHBOARD_STATS, DashboardStats } from '../models/mock-data/dashboard.mock';
 import { AttachmentType, Attachment } from '../models/attachment.model';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LocaleDateService } from '../service/locale-date.service';
 
 interface FileFolder {
     name: string;
@@ -31,6 +32,7 @@ interface FileViewMode {
     imports: [CommonModule, RouterModule]
 })
 export class DashboardComponent {
+    private readonly localeDate = inject(LocaleDateService);
     stats = signal<DashboardStats>(MOCK_DASHBOARD_STATS);
     searchQuery = signal('');
     selectedFileType = signal<AttachmentType | 'all'>('all');
@@ -174,13 +176,7 @@ export class DashboardComponent {
     }
 
     formatDate(date: string): string {
-        return new Date(date).toLocaleDateString('es-AR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        return this.localeDate.formatDateTime(date);
     }
 
     // Navegación

@@ -1,14 +1,25 @@
 <section class="page-head">
   <div>
     <h1>Tickets</h1>
-    <p class="page-subtitle">
-      {{ filteredTickets().length }} visibles de {{ tickets().length }} totales
-    </p>
+    @if (loading()) {
+      <p class="page-subtitle">Loading tickets...</p>
+    } @else {
+      <p class="page-subtitle">
+        {{ filteredTickets().length }} visible out of {{ tickets().length }} total
+      </p>
+    }
   </div>
   <a [routerLink]="'/tickets/nuevo'" class="btn">+ Nuevo ticket</a>
 </section>
 
 <section class="table-card">
+  @if (loadError()) {
+    <div class="inline-alert inline-alert-error">
+      <span>{{ loadError() }}</span>
+      <button class="btn-inline" type="button" (click)="retryLoad()">Retry</button>
+    </div>
+  }
+
   <div class="toolbar">
     <div class="field grow-2">
       <label for="ticket-search">Buscar</label>
@@ -42,7 +53,11 @@
       </tr>
     </thead>
     <tbody>
-      @if (filteredTickets().length === 0) {
+      @if (loading()) {
+        <tr>
+          <td colspan="6" class="empty-cell">Loading data...</td>
+        </tr>
+      } @else if (filteredTickets().length === 0) {
         <tr>
           <td colspan="6" class="empty-cell">No hay tickets para el filtro actual.</td>
         </tr>

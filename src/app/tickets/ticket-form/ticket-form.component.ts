@@ -13,6 +13,7 @@ import { InventoryService } from '../../service/inventory.service';
 import { TicketLogsService } from '../../service/ticket-logs.service';
 import { TicketPartsService } from '../../service/ticket-parts.service';
 import { TicketsService } from '../../service/tickets.service';
+import { LocaleDateService } from '../../service/locale-date.service';
 
 @Component({
   selector: 'app-ticket-form',
@@ -24,6 +25,7 @@ import { TicketsService } from '../../service/tickets.service';
 })
 export class TicketFormComponent {
   private readonly ticketService = inject(TicketsService);
+  private readonly localeDate = inject(LocaleDateService);
   private readonly clientService = inject(ClientsService);
   private readonly inventoryService = inject(InventoryService);
   private readonly ticketLogService = inject(TicketLogsService);
@@ -172,7 +174,7 @@ export class TicketFormComponent {
   }
 
   formatDateTime(value: string): string {
-    return new Date(value).toLocaleString();
+    return this.localeDate.formatDateTime(value);
   }
 
   resolvePartInventoryName(part: TicketPart): string {

@@ -1,5 +1,6 @@
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { ClientsService } from '../service/clients.service';
 import { Client } from '../models/client.model';
 
@@ -13,6 +14,8 @@ import { Client } from '../models/client.model';
 export class ClientsComponent {
     private clientService = inject(ClientsService);
     clients = signal<Client[]>([]);
+    loading = signal(true);
+    loadError = signal<string | null>(null);
 
     search = signal('');
 
@@ -28,10 +31,11 @@ export class ClientsComponent {
     };
 
     constructor() {
-        // Carga inicial de clientes
-        this.clientService.listClients().subscribe(data => {
-            this.clients.set(data);
-        });
+        this.loadClients();
+    }
+
+    retryLoad(): void {
+        this.loadClients();
     }
 
     deleteClient(id: number) {
@@ -56,5 +60,21 @@ export class ClientsComponent {
             }
         }
         return fallback;
+    }
+
+    private loadClients(): void {
+        this.loading.set(true);
+        this.loadError.set(null);
+
+        this.clientService.listClients()
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: (data) => this.clients.set(data),
+                error: (error) => {
+                    console.error('Error loading clients:', error);
+                    this.clients.set([]);
+                    this.loadError.set(this.extractErrorMessage(error, 'Unable to load clients.'));
+                }
+            });
     }
 }

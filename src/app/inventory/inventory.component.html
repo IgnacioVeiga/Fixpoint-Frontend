@@ -1,14 +1,25 @@
 <section class="page-head">
   <div>
     <h1>Inventario</h1>
-    <p class="page-subtitle">
-      {{ filteredItems().length }} visibles de {{ items().length }} componentes
-    </p>
+    @if (loading()) {
+      <p class="page-subtitle">Loading inventory...</p>
+    } @else {
+      <p class="page-subtitle">
+        {{ filteredItems().length }} visible out of {{ items().length }} components
+      </p>
+    }
   </div>
   <a [routerLink]="'/inventario/nuevo'" class="btn">+ Nuevo componente</a>
 </section>
 
 <section class="table-card">
+  @if (loadError()) {
+    <div class="inline-alert inline-alert-error">
+      <span>{{ loadError() }}</span>
+      <button class="btn-inline" type="button" (click)="retryLoad()">Retry</button>
+    </div>
+  }
+
   <div class="toolbar">
     <div class="field grow-2">
       <label for="inventory-search">Buscar</label>
@@ -58,7 +69,11 @@
       </tr>
     </thead>
     <tbody>
-      @if (filteredItems().length === 0) {
+      @if (loading()) {
+        <tr>
+          <td colspan="8" class="empty-cell">Loading data...</td>
+        </tr>
+      } @else if (filteredItems().length === 0) {
         <tr>
           <td colspan="8" class="empty-cell">No hay componentes para el filtro actual.</td>
         </tr>

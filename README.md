@@ -51,3 +51,7 @@ Run configurations compartidas en `.run/`:
 - `tickets.service.spec.ts`: service behavior with mocked `ApiService`.
 
 For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).
+
+## CI
+
+GitHub Actions workflow: `.github/workflows/ci.yml` installs Chrome, runs unit tests, and builds the app on push/PR.

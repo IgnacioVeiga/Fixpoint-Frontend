@@ -26,6 +26,8 @@ npm run start:mock
 npm run build
 npm run build:qa
 npm run build:mock
+npm run test
+npm run test:ci
 ```
 
 ## IntelliJ IDEA
@@ -42,3 +44,10 @@ Run configurations compartidas en `.run/`:
 
 - En `mock`, los servicios usan fallback local (`useMockFallback: true`).
 - En `dev/qa/prod`, consume backend real vía `apiBaseUrl`.
+
+## Unit tests included
+
+- `api.service.spec.ts`: URL resolution and query params normalization.
+- `tickets.service.spec.ts`: service behavior with mocked `ApiService`.
+
+For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).

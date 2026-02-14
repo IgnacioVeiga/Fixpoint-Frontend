@@ -11,7 +11,8 @@
     "build:qa": "ng build --configuration qa",
     "build:mock": "ng build --configuration mock",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {

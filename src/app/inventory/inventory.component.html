@@ -1,30 +1,49 @@
-<h1>Inventario</h1>
-<div class="inventory-header">
-  <input
-    type="text"
-    placeholder="Buscar componente..."
-    [value]="search()"
-    (input)="search.set($any($event.target).value)"
-  />
-  <label>Condición:</label>
-  <select
-    [value]="conditionFilter()"
-    (change)="conditionFilter.set($any($event.target).value)"
-  >
-    @for (c of conditions; track c.value) {
-    <option [value]="c.value">{{ c.label }}</option>
-    }
-  </select>
-  <label>Tipo:</label>
-  <input
-    type="text"
-    placeholder="Ej: capacitor, display..."
-    [value]="typeFilter()"
-    (input)="typeFilter.set($any($event.target).value)"
-  />
-  <a [routerLink]="'/inventario/nuevo'" class="btn">+ Nuevo Componente</a>
-</div>
-<section>
+<section class="page-head">
+  <div>
+    <h1>Inventario</h1>
+    <p class="page-subtitle">
+      {{ filteredItems().length }} visibles de {{ items().length }} componentes
+    </p>
+  </div>
+  <a [routerLink]="'/inventario/nuevo'" class="btn">+ Nuevo componente</a>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <div class="field grow-2">
+      <label for="inventory-search">Buscar</label>
+      <input
+        id="inventory-search"
+        type="text"
+        placeholder="Nombre o descripción"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </div>
+    <div class="field">
+      <label for="inventory-condition">Condición</label>
+      <select
+        id="inventory-condition"
+        [value]="conditionFilter()"
+        (change)="conditionFilter.set($any($event.target).value)"
+      >
+        @for (c of conditions; track c.value) {
+          <option [value]="c.value">{{ c.label }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="inventory-type">Tipo</label>
+      <input
+        id="inventory-type"
+        type="text"
+        placeholder="Ej: display, capacitor"
+        [value]="typeFilter()"
+        (input)="typeFilter.set($any($event.target).value)"
+      />
+    </div>
+  </div>
+
   <table class="inventory-table">
     <thead>
       <tr>
@@ -35,24 +54,30 @@
         <th>Condición</th>
         <th>Cantidad</th>
         <th>Ubicación</th>
-        <th></th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      @for (i of filteredItems(); track i.id) {
-      <tr>
-        <td>{{ i.id }}</td>
-        <td>{{ i.name }}</td>
-        <td>{{ i.componentType }}</td>
-        <td>{{ i.description }}</td>
-        <td>{{ getConditionLabel(i.condition) }}</td>
-        <td>{{ i.quantity }}</td>
-        <td>{{ i.location }}</td>
-        <td>
-          <a [routerLink]="['/inventario', i.id]">Editar</a>
-          <button class="delete-btn" (click)="deleteItem(i.id)">Eliminar</button>
-        </td>
-      </tr>
+      @if (filteredItems().length === 0) {
+        <tr>
+          <td colspan="8" class="empty-cell">No hay componentes para el filtro actual.</td>
+        </tr>
+      } @else {
+        @for (i of filteredItems(); track i.id) {
+          <tr>
+            <td>#{{ i.id }}</td>
+            <td>{{ i.name }}</td>
+            <td>{{ i.componentType || '-' }}</td>
+            <td>{{ i.description || '-' }}</td>
+            <td>{{ getConditionLabel(i.condition) }}</td>
+            <td>{{ i.quantity }}</td>
+            <td>{{ i.location || '-' }}</td>
+            <td class="inline-actions">
+              <a [routerLink]="['/inventario', i.id]">Editar</a>
+              <button class="delete-btn" (click)="deleteItem(i.id)">Eliminar</button>
+            </td>
+          </tr>
+        }
       }
     </tbody>
   </table>

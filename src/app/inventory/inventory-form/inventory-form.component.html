@@ -1,9 +1,19 @@
 @if (isEditing()) {
-  <h1>Editar Componente</h1>
+  <section class="page-head">
+    <div>
+      <h1>Editar Componente</h1>
+      <p class="page-subtitle">Actualizá stock y ubicación física.</p>
+    </div>
+  </section>
 } @else {
-  <h1>Alta de Componente</h1>
+  <section class="page-head">
+    <div>
+      <h1>Alta de Componente</h1>
+      <p class="page-subtitle">Registrá un repuesto para usar en tickets.</p>
+    </div>
+  </section>
 }
-<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+<form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
     <label>Nombre</label>
     <input formControlName="name" required />
@@ -42,5 +52,5 @@
     <label>Ubicación</label>
     <input formControlName="location" />
   </div>
-  <button type="submit" [disabled]="form.invalid">Guardar Componente</button>
+  <button class="btn" type="submit" [disabled]="form.invalid">Guardar componente</button>
 </form>

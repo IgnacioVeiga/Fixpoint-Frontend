@@ -45,16 +45,11 @@ export class ClientFormComponent {
         if (this.form.valid) {
             if (this.isEditing()) {
                 const id = this.editingId()!;
-                this.clientService.updateClient(id, {
-                    ...this.form.value,
-                    id
-                }).subscribe(() => {
+                this.clientService.updateClient(id, this.form.value).subscribe(() => {
                     this.router.navigate(['/clientes']);
                 });
             } else {
-                this.clientService.createClient({
-                    ...this.form.value
-                }).subscribe(() => {
+                this.clientService.createClient(this.form.value).subscribe(() => {
                     this.router.navigate(['/clientes']);
                 });
             }

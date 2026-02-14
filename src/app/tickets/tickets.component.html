@@ -1,15 +1,35 @@
-<h1>Tickets</h1>
-<div class="tickets-header">
-  <input type="text" placeholder="Buscar..." [value]="search()" (input)="search.set($any($event.target).value)" />
-  <label for="estado">Estado:</label>
-  <select id="estado" [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
-    @for (est of estados; track est.value) {
-      <option [value]="est.value">{{ est.label }}</option>
-    }
-  </select>
-  <a [routerLink]="'/tickets/nuevo'" class="btn">+ Nuevo Ticket</a>
-</div>
-<section>
+<section class="page-head">
+  <div>
+    <h1>Tickets</h1>
+    <p class="page-subtitle">
+      {{ filteredTickets().length }} visibles de {{ tickets().length }} totales
+    </p>
+  </div>
+  <a [routerLink]="'/tickets/nuevo'" class="btn">+ Nuevo ticket</a>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <div class="field grow-2">
+      <label for="ticket-search">Buscar</label>
+      <input
+        id="ticket-search"
+        type="text"
+        placeholder="Equipo, marca, modelo o problema"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </div>
+    <div class="field">
+      <label for="estado">Estado</label>
+      <select id="estado" [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value)">
+        @for (est of estados; track est.value) {
+          <option [value]="est.value">{{ est.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
   <table class="tickets-table">
     <thead>
       <tr>
@@ -18,22 +38,32 @@
         <th>Cliente</th>
         <th>Estado</th>
         <th>Ingreso</th>
-        <th></th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      @for (t of filteredTickets(); track t.id) {
+      @if (filteredTickets().length === 0) {
         <tr>
-          <td>{{ t.id }}</td>
-          <td>{{ t.deviceType }} {{ t.brand }} {{ t.model }}</td>
-          <td>#{{ t.clientId }}</td>
-          <td>{{ getStatusLabel(t.status) }}</td>
-          <td>{{ t.entryDate }}</td>
-          <td>
-            <a [routerLink]="['/tickets', t.id]">Editar</a>
-            <button class="delete-btn" (click)="deleteTicket(t.id)">Eliminar</button>
-          </td>
+          <td colspan="6" class="empty-cell">No hay tickets para el filtro actual.</td>
         </tr>
+      } @else {
+        @for (t of filteredTickets(); track t.id) {
+          <tr>
+            <td>#{{ t.id }}</td>
+            <td>{{ t.deviceType }} {{ t.brand }} {{ t.model }}</td>
+            <td>#{{ t.clientId }}</td>
+            <td>
+              <span class="status-pill" [class]="'status-pill status-' + t.status">
+                {{ getStatusLabel(t.status) }}
+              </span>
+            </td>
+            <td>{{ formatEntryDate(t.entryDate) }}</td>
+            <td class="inline-actions">
+              <a [routerLink]="['/tickets', t.id]">Editar</a>
+              <button class="delete-btn" (click)="deleteTicket(t.id)">Eliminar</button>
+            </td>
+          </tr>
+        }
       }
     </tbody>
   </table>

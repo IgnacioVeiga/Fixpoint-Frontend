@@ -15,3 +15,7 @@ export interface Ticket {
     createdBy?: string;
     lastUpdated: string;
 }
+
+export type SaveTicketRequest = Omit<Ticket, 'id' | 'lastUpdated'> & {
+    lastUpdated?: string;
+};

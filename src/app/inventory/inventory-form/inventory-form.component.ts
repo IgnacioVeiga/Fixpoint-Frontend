@@ -56,7 +56,7 @@ export class InventoryFormComponent {
             
             if (this.isEditing()) {
                 const id = this.editingId()!;
-                this.inventory.updateInventory(id, { ...formValue, id }).subscribe(() => {
+                this.inventory.updateInventory(id, formValue).subscribe(() => {
                     this.router.navigate(['/inventario']);
                 });
             } else {

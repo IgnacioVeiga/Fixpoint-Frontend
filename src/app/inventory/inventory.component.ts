@@ -1,4 +1,4 @@
-import { Component, signal, ChangeDetectionStrategy, effect, inject } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { InventoryService } from '../service/inventory.service';
 import { InventoryItem } from '../models/inventory.model';
@@ -53,9 +53,25 @@ export class InventoryComponent {
 
     deleteItem(id: number) {
         if (confirm('¿Estás seguro de que deseas eliminar este componente?')) {
-            this.inventory.deleteInventory(id).subscribe(() => {
-                this.items.set(this.items().filter(item => item.id !== id));
+            this.inventory.deleteInventory(id).subscribe({
+                next: () => {
+                    this.items.set(this.items().filter(item => item.id !== id));
+                },
+                error: (error) => {
+                    console.error('Error al eliminar componente:', error);
+                    alert(this.extractErrorMessage(error, 'No se pudo eliminar el componente.'));
+                }
             });
+        }        
+    }
+
+    private extractErrorMessage(error: unknown, fallback: string): string {
+        if (typeof error === 'object' && error !== null) {
+            const maybeHttpError = error as { error?: { message?: string } };
+            if (maybeHttpError.error?.message) {
+                return maybeHttpError.error.message;
+            }
         }
+        return fallback;
     }
 }

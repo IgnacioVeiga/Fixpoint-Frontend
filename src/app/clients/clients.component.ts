@@ -36,9 +36,25 @@ export class ClientsComponent {
 
     deleteClient(id: number) {
         if (confirm('¿Estás seguro de que deseas eliminar este cliente?')) {
-            this.clientService.deleteClient(id).subscribe(() => {
-                this.clients.set(this.clients().filter(client => client.id !== id));
+            this.clientService.deleteClient(id).subscribe({
+                next: () => {
+                    this.clients.set(this.clients().filter(client => client.id !== id));
+                },
+                error: (error) => {
+                    console.error('Error al eliminar cliente:', error);
+                    alert(this.extractErrorMessage(error, 'No se pudo eliminar el cliente.'));
+                }
             });
         }
+    }
+
+    private extractErrorMessage(error: unknown, fallback: string): string {
+        if (typeof error === 'object' && error !== null) {
+            const maybeHttpError = error as { error?: { message?: string } };
+            if (maybeHttpError.error?.message) {
+                return maybeHttpError.error.message;
+            }
+        }
+        return fallback;
     }
 }

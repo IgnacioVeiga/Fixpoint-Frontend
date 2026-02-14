@@ -11,3 +11,5 @@ export interface InventoryItem {
     location?: string;
     addedAt: string;
 }
+
+export type SaveInventoryRequest = Omit<InventoryItem, 'id' | 'addedAt'>;

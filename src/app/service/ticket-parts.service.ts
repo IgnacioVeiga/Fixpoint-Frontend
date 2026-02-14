@@ -1,30 +1,45 @@
 import { Injectable, inject } from '@angular/core';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { Observable } from 'rxjs';
-import { TicketPart } from '../models/ticket-part.model';
+import { AddTicketPartRequest, TicketPart } from '../models/ticket-part.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TicketPartsService {
-  private api = inject(ApiService);
-  private endpoint = 'ticketparts';
+  private readonly api = inject(ApiService);
+  private readonly mockPartsByTicket = new Map<number, TicketPart[]>();
 
   listTicketParts(ticketId: number): Observable<TicketPart[]> {
-    return this.api.get<TicketPart[]>(`${this.endpoint}?ticketId=${ticketId}`);
+    if (environment.useMockFallback) {
+      return of(this.mockPartsByTicket.get(ticketId) ?? []);
+    }
+
+    return this.api.get<TicketPart[]>(`tickets/${ticketId}/parts`).pipe(
+      catchError((error) => this.handleError(error, `Error al listar piezas del ticket ${ticketId}`))
+    );
   }
 
-  getTicketPart(id: number): Observable<TicketPart> {
-    return this.api.get<TicketPart>(`${this.endpoint}/${id}`);
+  createTicketPart(ticketId: number, part: AddTicketPartRequest): Observable<TicketPart> {
+    if (environment.useMockFallback) {
+      const existingParts = this.mockPartsByTicket.get(ticketId) ?? [];
+      const newPart: TicketPart = {
+        id: Date.now(),
+        inventoryId: part.inventoryId,
+        quantity: part.quantity,
+        note: part.note
+      };
+      this.mockPartsByTicket.set(ticketId, [...existingParts, newPart]);
+      return of(newPart);
+    }
+
+    return this.api.post<TicketPart>(`tickets/${ticketId}/parts`, part).pipe(
+      catchError((error) => this.handleError(error, `Error al agregar pieza al ticket ${ticketId}`))
+    );
   }
 
-  createTicketPart(part: TicketPart): Observable<TicketPart> {
-    return this.api.post<TicketPart>(this.endpoint, part);
-  }
-
-  updateTicketPart(id: number, part: TicketPart): Observable<TicketPart> {
-    return this.api.put<TicketPart>(`${this.endpoint}/${id}`, part);
-  }
-
-  deleteTicketPart(id: number): Observable<void> {
-    return this.api.delete<void>(`${this.endpoint}/${id}`);
+  private handleError(error: unknown, message: string): Observable<never> {
+    console.error(message, error);
+    return throwError(() => error);
   }
 }

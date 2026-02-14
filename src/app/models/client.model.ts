@@ -6,5 +6,5 @@ export interface Client {
     email?: string;
     address?: string;
     notes?: string;
-    createdAt: string;
+    createdAt?: string;
 }

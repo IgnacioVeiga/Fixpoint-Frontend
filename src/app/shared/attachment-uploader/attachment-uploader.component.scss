@@ -1,19 +1,18 @@
 .attachment-uploader {
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    padding: 1rem;
-    background: #fafbff;
-    transition: all 0.3s ease;
+    border: 1px dashed #9fbbb5;
+    border-radius: 12px;
+    padding: 0.85rem;
+    background: #f8fbfa;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
 
-    &.drag-over {
-        border-color: #3f51b5;
-        background: #e8eaf6;
-    }
+.attachment-uploader.drag-over {
+    border-color: #1f6f62;
+    background: #e7f4f0;
 }
 
 .upload-zone {
-    position: relative;
-    min-height: 120px;
+    min-height: 110px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,62 +23,62 @@
     display: none;
 }
 
-.upload-message {
-    .upload-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
+.upload-icon {
+    font-size: 2rem;
+}
 
-    p {
-        margin: 0.5rem 0;
-        color: #666;
-    }
+.upload-message p {
+    margin: 0.42rem 0;
+}
+
+.upload-info,
+.size-info {
+    color: #586865;
+    font-size: 0.87rem;
 }
 
 .browse-btn {
-    background: none;
     border: none;
-    color: #3f51b5;
-    cursor: pointer;
-    font-weight: 500;
+    background: none;
+    color: #1f6f62;
+    font-weight: 700;
     text-decoration: underline;
-    
-    &:hover {
-        color: #283593;
-    }
+    cursor: pointer;
+    padding: 0;
 }
 
 .file-type {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    margin: 0.25rem;
-    background: #e3e8ff;
-    border-radius: 4px;
-    font-size: 0.9em;
+    display: inline-flex;
+    border-radius: 999px;
+    background: #d8ece7;
+    padding: 0.12rem 0.42rem;
+    margin: 0.15rem;
+    font-size: 0.78rem;
 }
 
 .upload-progress {
+    margin-top: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #e3f2fd;
-    border-radius: 4px;
+    gap: 0.6rem;
+    border-radius: 8px;
+    background: #dbede9;
+    color: #1f6f62;
+    padding: 0.55rem;
+}
 
-    .spinner {
-        width: 20px;
-        height: 20px;
-        border: 2px solid #3f51b5;
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #1f6f62;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
 .attachments-list {
-    margin-top: 1rem;
+    margin-top: 0.7rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -88,126 +87,58 @@
 .attachment-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.75rem;
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #eee;
+    gap: 0.75rem;
+    border: 1px solid #d4dfdb;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0.58rem 0.7rem;
     cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-        background: #f5f5f5;
-        border-color: #ddd;
-    }
-
-    .attachment-icon {
-        font-size: 1.5rem;
-    }
-
-    .attachment-info {
-        flex: 1;
-        min-width: 0;
-
-        .attachment-name {
-            display: block;
-            font-weight: 500;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .attachment-meta {
-            font-size: 0.9em;
-            color: #666;
-        }
-    }
-
-    .delete-btn {
-        background: none;
-        border: none;
-        padding: 0.25rem;
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s;
-
-        &:hover {
-            opacity: 1;
-        }
-    }
 }
 
-.preview-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+.attachment-item:hover {
+    background: #f5faf8;
 }
 
-.preview-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-    background: white;
-    border-radius: 8px;
+.attachment-icon {
+    font-size: 1.2rem;
+}
+
+.attachment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.attachment-name {
+    display: block;
+    font-weight: 700;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-    iframe, img {
-        width: 100%;
-        height: 100%;
-        max-height: 85vh;
-        object-fit: contain;
-    }
+.attachment-meta {
+    font-size: 0.8rem;
+    color: #576864;
+}
 
-    .close-btn {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: #fff;
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        z-index: 1;
-
-        &:hover {
-            background: #f5f5f5;
-        }
-    }
+.empty-files {
+    margin-top: 0.7rem;
+    font-size: 0.88rem;
+    color: #576864;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .attachment-item {
         flex-wrap: wrap;
-        gap: 0.5rem;
+    }
 
-        .attachment-info {
-            width: 100%;
-            order: 1;
-        }
-
-        .attachment-icon {
-            order: 0;
-        }
-
-        .delete-btn {
-            order: 2;
-        }
+    .attachment-info {
+        width: 100%;
     }
 }

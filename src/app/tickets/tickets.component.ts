@@ -48,6 +48,14 @@ export class TicketsComponent {
         return found ? found.label : status;
     }
 
+    formatEntryDate(value: string): string {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            const [year, month, day] = value.split('-').map(Number);
+            return new Date(year, month - 1, day).toLocaleDateString();
+        }
+        return new Date(value).toLocaleDateString();
+    }
+
     constructor() {
         // Carga inicial de tickets
         this.ticketService.listTickets().subscribe(data => {
@@ -57,9 +65,25 @@ export class TicketsComponent {
 
     deleteTicket(id: number) {
         if (confirm('¿Estás seguro de que deseas eliminar este ticket?')) {
-            this.ticketService.deleteTicket(id).subscribe(() => {
-                this.tickets.set(this.tickets().filter(ticket => ticket.id !== id));
+            this.ticketService.deleteTicket(id).subscribe({
+                next: () => {
+                    this.tickets.set(this.tickets().filter(ticket => ticket.id !== id));
+                },
+                error: (error) => {
+                    console.error('Error al eliminar ticket:', error);
+                    alert(this.extractErrorMessage(error, 'No se pudo eliminar el ticket.'));
+                }
             });
         }
+    }
+
+    private extractErrorMessage(error: unknown, fallback: string): string {
+        if (typeof error === 'object' && error !== null) {
+            const maybeHttpError = error as { error?: { message?: string } };
+            if (maybeHttpError.error?.message) {
+                return maybeHttpError.error.message;
+            }
+        }
+        return fallback;
     }
 }

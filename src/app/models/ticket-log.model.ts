@@ -5,3 +5,8 @@ export interface TicketLog {
     description: string;
     author?: string;
 }
+
+export interface CreateTicketLogRequest {
+    description: string;
+    author?: string;
+}

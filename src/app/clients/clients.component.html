@@ -1,9 +1,27 @@
-<h1>Clientes</h1>
-<div class="clients-header">
-  <input type="text" placeholder="Buscar cliente..." [value]="search()" (input)="search.set($any($event.target).value)" />
-  <a [routerLink]="'/clientes/nuevo'" class="btn">+ Nuevo Cliente</a>
-</div>
-<section>
+<section class="page-head">
+  <div>
+    <h1>Clientes</h1>
+    <p class="page-subtitle">
+      {{ filteredClients().length }} visibles de {{ clients().length }} registros
+    </p>
+  </div>
+  <a [routerLink]="'/clientes/nuevo'" class="btn">+ Nuevo cliente</a>
+</section>
+
+<section class="table-card">
+  <div class="toolbar">
+    <div class="field grow-2">
+      <label for="client-search">Buscar</label>
+      <input
+        id="client-search"
+        type="text"
+        placeholder="Nombre, DNI, teléfono o email"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+    </div>
+  </div>
+
   <table class="clients-table">
     <thead>
       <tr>
@@ -13,23 +31,29 @@
         <th>Teléfono</th>
         <th>Email</th>
         <th>Dirección</th>
-        <th></th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      @for (c of filteredClients(); track c.id) {
+      @if (filteredClients().length === 0) {
         <tr>
-          <td>{{ c.id }}</td>
-          <td>{{ c.name }}</td>
-          <td>{{ c.dni }}</td>
-          <td>{{ c.phone }}</td>
-          <td>{{ c.email }}</td>
-          <td>{{ c.address }}</td>
-          <td>
-            <a [routerLink]="['/clientes', c.id]">Editar</a>
-            <button class="delete-btn" (click)="deleteClient(c.id)">Eliminar</button>
-          </td>
+          <td colspan="7" class="empty-cell">No hay clientes para el filtro actual.</td>
         </tr>
+      } @else {
+        @for (c of filteredClients(); track c.id) {
+          <tr>
+            <td>#{{ c.id }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.dni || '-' }}</td>
+            <td>{{ c.phone || '-' }}</td>
+            <td>{{ c.email || '-' }}</td>
+            <td>{{ c.address || '-' }}</td>
+            <td class="inline-actions">
+              <a [routerLink]="['/clientes', c.id]">Editar</a>
+              <button class="delete-btn" (click)="deleteClient(c.id)">Eliminar</button>
+            </td>
+          </tr>
+        }
       }
     </tbody>
   </table>

@@ -1,9 +1,19 @@
 @if (isEditing()) {
-  <h1>Editar Cliente</h1>
+  <section class="page-head">
+    <div>
+      <h1>Editar Cliente</h1>
+      <p class="page-subtitle">Actualizá datos de contacto y notas internas.</p>
+    </div>
+  </section>
 } @else {
-  <h1>Alta de Cliente</h1>
+  <section class="page-head">
+    <div>
+      <h1>Alta de Cliente</h1>
+      <p class="page-subtitle">Carga rápida para asociar tickets.</p>
+    </div>
+  </section>
 }
-<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+<form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
     <label>Nombre</label>
     <input formControlName="name" required />
@@ -34,5 +44,5 @@
     <label>Notas</label>
     <textarea formControlName="notes"></textarea>
   </div>
-  <button type="submit" [disabled]="form.invalid">Guardar Cliente</button>
+  <button class="btn" type="submit" [disabled]="form.invalid">Guardar cliente</button>
 </form>

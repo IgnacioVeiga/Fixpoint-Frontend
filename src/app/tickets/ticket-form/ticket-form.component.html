@@ -1,63 +1,196 @@
-@if (isEditing()) {
-  <h1>Editar Ticket</h1>
-} @else {
-  <h1>Alta de Ticket</h1>
-}
-<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+<section class="page-head">
   <div>
-    <label>Cliente</label>
-    <select formControlName="clientId" required>
-      <option value="">Seleccionar cliente...</option>
-      @for (c of clients(); track c.id) {
-        <option [value]="c.id">{{ c.name }}</option>
+    @if (isEditing()) {
+      <h1>Detalle de Ticket #{{ editingId() }}</h1>
+      <p class="page-subtitle">Diagnóstico, repuestos y adjuntos en una sola vista.</p>
+    } @else {
+      <h1>Alta de Ticket</h1>
+      <p class="page-subtitle">Completá lo básico y luego continuá con historial y piezas.</p>
+    }
+  </div>
+</section>
+
+<form class="ticket-main-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="ticket-grid">
+    <div>
+      <label>Cliente</label>
+      <select formControlName="clientId" required>
+        <option value="">Seleccionar cliente...</option>
+        @for (client of clients(); track client.id) {
+          <option [value]="client.id">{{ client.name }}</option>
+        }
+      </select>
+      @if (form.get('clientId')?.touched && form.get('clientId')?.invalid) {
+        <span class="error">Cliente requerido</span>
       }
-    </select>
-    @if (form.get('clientId')?.touched && form.get('clientId')?.invalid) {
-      <span class="error">Requerido</span>
-    }
-    <a [routerLink]="'/clientes/nuevo'" class="btn-link">+ Nuevo cliente</a>
-  </div>
-  <div>
-    <label>Tipo de equipo</label>
-    <input formControlName="deviceType" required />
-    @if (form.get('deviceType')?.touched && form.get('deviceType')?.invalid) {
-      <span class="error">Requerido</span>
-    }
-  </div>
-  <div>
-    <label>Marca</label>
-    <input formControlName="brand" />
-  </div>
-  <div>
-    <label>Modelo</label>
-    <input formControlName="model" />
-  </div>
-  <div>
-    <label>N° de serie</label>
-    <input formControlName="serialNumber" />
-  </div>
-  <div>
-    <label>Fecha de ingreso</label>
-    <input type="date" formControlName="entryDate" required />
-  </div>
-  <div>
-    <label>Descripción del problema</label>
-    <textarea formControlName="problemDescription" required></textarea>
-    @if (form.get('problemDescription')?.touched && form.get('problemDescription')?.invalid) {
-      <span class="error">Requerido</span>
-    }
-  </div>
-  <div>
-    <label>Estado</label>
-    <select formControlName="status" required>
-      @for (s of statusOptions; track s.value) {
-        <option [value]="s.value">{{ s.label }}</option>
+      <a [routerLink]="'/clientes/nuevo'" class="btn-link">+ Nuevo cliente</a>
+    </div>
+
+    <div>
+      <label>Tipo de equipo</label>
+      <input formControlName="deviceType" required />
+      @if (form.get('deviceType')?.touched && form.get('deviceType')?.invalid) {
+        <span class="error">Requerido</span>
       }
-    </select>
+    </div>
+
+    <div>
+      <label>Marca</label>
+      <input formControlName="brand" />
+    </div>
+
+    <div>
+      <label>Modelo</label>
+      <input formControlName="model" />
+    </div>
+
+    <div>
+      <label>N° de serie</label>
+      <input formControlName="serialNumber" />
+    </div>
+
+    <div>
+      <label>Fecha de ingreso</label>
+      <input type="date" formControlName="entryDate" required />
+    </div>
+
+    <div class="full-row">
+      <label>Descripción del problema</label>
+      <textarea formControlName="problemDescription" required></textarea>
+      @if (form.get('problemDescription')?.touched && form.get('problemDescription')?.invalid) {
+        <span class="error">Requerido</span>
+      }
+    </div>
+
+    <div>
+      <label>Estado</label>
+      <select formControlName="status" required>
+        @for (status of statusOptions; track status.value) {
+          <option [value]="status.value">{{ status.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      <label>Creado por</label>
+      <input formControlName="createdBy" placeholder="Técnico/a" />
+    </div>
   </div>
-  <div>
+
+  <div class="checkboxes">
     <label><input type="checkbox" formControlName="needsContract" /> Requiere contrato</label>
     <label><input type="checkbox" formControlName="contractSigned" /> Contrato firmado</label>
   </div>
-  <button type="submit" [disabled]="form.invalid">Guardar Ticket</button>
+
+  <button class="btn" type="submit" [disabled]="form.invalid">Guardar ticket</button>
 </form>
+
+@if (isEditing() && editingId()) {
+  <div class="ticket-sections">
+    <section class="ticket-section">
+      <h2>Historial técnico</h2>
+      <form class="section-form" [formGroup]="logForm" (ngSubmit)="addLog()" novalidate>
+        <div class="section-form-grid">
+          <div class="full-row">
+            <label>Descripción</label>
+            <textarea formControlName="description" required></textarea>
+          </div>
+          <div>
+            <label>Autor</label>
+            <input formControlName="author" />
+          </div>
+        </div>
+        <button class="btn" type="submit" [disabled]="logForm.invalid">Agregar log</button>
+      </form>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Autor</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (ticketLogs().length === 0) {
+              <tr>
+                <td colspan="3" class="empty-cell">Sin registros técnicos.</td>
+              </tr>
+            } @else {
+              @for (log of ticketLogs(); track log.id) {
+                <tr>
+                  <td>{{ formatDateTime(log.timestamp) }}</td>
+                  <td>{{ log.author || 'Sin autor' }}</td>
+                  <td>{{ log.description }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ticket-section">
+      <h2>Piezas utilizadas</h2>
+      <form class="section-form" [formGroup]="partForm" (ngSubmit)="addPart()" novalidate>
+        <div class="section-form-grid">
+          <div>
+            <label>Componente</label>
+            <select formControlName="inventoryId" required>
+              <option value="">Seleccionar componente...</option>
+              @for (item of inventoryItems(); track item.id) {
+                <option [value]="item.id">{{ item.name }} (stock: {{ item.quantity }})</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label>Cantidad</label>
+            <input type="number" min="1" formControlName="quantity" required />
+          </div>
+          <div class="full-row">
+            <label>Nota</label>
+            <input formControlName="note" />
+          </div>
+        </div>
+        <button class="btn" type="submit" [disabled]="partForm.invalid">Agregar pieza</button>
+      </form>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Componente</th>
+              <th>Cantidad</th>
+              <th>Nota</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (ticketParts().length === 0) {
+              <tr>
+                <td colspan="3" class="empty-cell">Sin piezas asociadas.</td>
+              </tr>
+            } @else {
+              @for (part of ticketParts(); track part.id) {
+                <tr>
+                  <td>{{ resolvePartInventoryName(part) }}</td>
+                  <td>{{ part.quantity }}</td>
+                  <td>{{ part.note || '-' }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ticket-section">
+      <h2>Adjuntos</h2>
+      <app-attachment-uploader [ticketId]="editingId()!"></app-attachment-uploader>
+    </section>
+  </div>
+} @else {
+  <section class="ticket-section">
+    <p class="page-subtitle">Guardá el ticket para habilitar historial técnico, piezas y adjuntos.</p>
+  </section>
+}

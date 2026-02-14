@@ -17,59 +17,42 @@
     <div class="upload-message">
       <span class="upload-icon">📤</span>
       <p>
-        Arrastra archivos aquí o
-        <button class="browse-btn" (click)="fileInput.click()">
-          selecciona archivos
-        </button>
+        Arrastrá archivos o
+        <button class="browse-btn" type="button" (click)="fileInput.click()">seleccionalos</button>
       </p>
       <p class="upload-info">
-        Formatos permitidos: @for (type of allowedTypes; track type) {
-        <span class="file-type">{{ fileTypes[type].icon }} {{ type }}</span>
+        Tipos:
+        @for (type of allowedTypes; track type) {
+          <span class="file-type">{{ getFileTypeIcon(type) }} {{ type }}</span>
         }
       </p>
-      <p class="size-info">
-        Tamaño máximo por archivo: {{ formatFileSize(maxFileSize) }}
-      </p>
+      <p class="size-info">Máx por archivo: {{ formatFileSize(maxFileSize) }}</p>
     </div>
   </div>
 
   @if (uploading()) {
-  <div class="upload-progress">
-    <div class="spinner"></div>
-    <span>Subiendo archivos...</span>
-  </div>
-  } @if (attachments().length > 0) {
-  <div class="attachments-list">
-    @for (attachment of attachments(); track attachment.id) {
-    <div class="attachment-item" (click)="previewFile(attachment)">
-      <span class="attachment-icon">
-        {{ fileTypes[attachment.fileType].icon }}
-      </span>
-      <div class="attachment-info">
-        <span class="attachment-name">{{ attachment.filename }}</span>
-        <span class="attachment-meta">
-          {{ formatFileSize(1024 * 1024) }} •
-          {{ attachment.uploadedAt | date : "dd/MM/yyyy HH:mm" }}
-        </span>
-      </div>
-      <button class="delete-btn" (click)="deleteAttachment(attachment, $event)">
-        ❌
-      </button>
+    <div class="upload-progress">
+      <div class="spinner"></div>
+      <span>Subiendo archivos...</span>
     </div>
-    }
-  </div>
+  }
+
+  @if (attachments().length > 0) {
+    <div class="attachments-list">
+      @for (attachment of attachments(); track attachment.id) {
+        <div class="attachment-item" (click)="previewFile(attachment)">
+          <span class="attachment-icon">{{ getFileTypeIcon(attachment.fileType) }}</span>
+          <div class="attachment-info">
+            <span class="attachment-name">{{ attachment.filename }}</span>
+            <span class="attachment-meta">
+              {{ attachment.fileType }} • {{ attachment.uploadedAt | date : "short" }}
+            </span>
+          </div>
+          <button class="delete-btn" type="button" (click)="deleteAttachment(attachment, $event)">Eliminar</button>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="empty-files">Sin adjuntos cargados.</p>
   }
 </div>
-
-@if (currentPreview()) {
-<div class="preview-modal" (click)="closePreview()">
-  <div class="preview-content" (click)="$event.stopPropagation()">
-    <button class="close-btn" (click)="closePreview()">✕</button>
-    @if (currentPreview()!.type === 'pdf') {
-    <iframe [src]="currentPreview()!.url" frameborder="0"></iframe>
-    } @else {
-    <img [src]="currentPreview()!.url" alt="Preview" />
-    }
-  </div>
-</div>
-}

@@ -8,7 +8,7 @@
                 <div class="status-bars">
                     @for (status of stats().ticketsByStatus | keyvalue; track status.key) {
                         <div class="status-bar">
-                            <div class="bar-label">{{ status.key }}</div>
+                            <div class="bar-label">{{ getStatusLabel(status.key) }}</div>
                             <div class="bar-container">
                                 <div class="bar" 
                                      [style.width.%]="(status.value / 50) * 100"

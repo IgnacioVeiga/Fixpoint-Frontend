@@ -155,6 +155,19 @@ export class DashboardComponent {
         return colors[status] || '#999';
     }
 
+    getStatusLabel(status: string): string {
+        const labels: Record<string, string> = {
+            received: 'Recibido',
+            diagnosing: 'Diagnóstico',
+            waiting_parts: 'Espera repuesto',
+            repairing: 'Reparación',
+            repaired: 'Reparado',
+            returned: 'Entregado',
+            cancelled: 'Cancelado'
+        };
+        return labels[status] ?? status;
+    }
+
     // Manejo de archivos
     getFileTypeIcon(type: AttachmentType): string {
         return this.fileTypes[type]?.icon || this.fileTypes['other'].icon;

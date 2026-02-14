@@ -58,3 +58,7 @@ For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).
 ## CI
 
 GitHub Actions workflow: `.github/workflows/ci.yml` installs Chrome, runs unit tests, and builds the app only on commits to `main`.
+
+## Branch protection
+
+Use `BRANCH_PROTECTION_CHECKLIST.md` before enabling/adjusting rules for `main`.

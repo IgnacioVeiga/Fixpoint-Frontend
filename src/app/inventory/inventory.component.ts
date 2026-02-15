@@ -1,5 +1,6 @@
 import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { InventoryService } from '../service/inventory.service';
 import { InventoryItem } from '../models/inventory.model';
 
@@ -13,6 +14,8 @@ import { InventoryItem } from '../models/inventory.model';
 export class InventoryComponent {
     private inventory = inject(InventoryService);
     items = signal<InventoryItem[]>([]);
+    loading = signal(true);
+    loadError = signal<string | null>(null);
 
     search = signal('');
     conditionFilter = signal('all');
@@ -45,10 +48,11 @@ export class InventoryComponent {
     }
 
     constructor() {
-        // Carga inicial de items
-        this.inventory.listInventory().subscribe(data => {
-            this.items.set(data);
-        });
+        this.loadInventory();
+    }
+
+    retryLoad(): void {
+        this.loadInventory();
     }
 
     deleteItem(id: number) {
@@ -73,5 +77,21 @@ export class InventoryComponent {
             }
         }
         return fallback;
+    }
+
+    private loadInventory(): void {
+        this.loading.set(true);
+        this.loadError.set(null);
+
+        this.inventory.listInventory()
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: (data) => this.items.set(data),
+                error: (error) => {
+                    console.error('Error loading inventory:', error);
+                    this.items.set([]);
+                    this.loadError.set(this.extractErrorMessage(error, 'Unable to load inventory.'));
+                }
+            });
     }
 }

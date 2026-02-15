@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { MOCK_DASHBOARD_STATS, DashboardStats } from '../models/mock-data/dashboard.mock';
 import { AttachmentType, Attachment } from '../models/attachment.model';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LocaleDateService } from '../service/locale-date.service';
 
 interface FileFolder {
     name: string;
@@ -31,6 +32,7 @@ interface FileViewMode {
     imports: [CommonModule, RouterModule]
 })
 export class DashboardComponent {
+    private readonly localeDate = inject(LocaleDateService);
     stats = signal<DashboardStats>(MOCK_DASHBOARD_STATS);
     searchQuery = signal('');
     selectedFileType = signal<AttachmentType | 'all'>('all');
@@ -144,15 +146,15 @@ export class DashboardComponent {
     // Calcular el color para cada estado de ticket
     getStatusColor(status: string): string {
         const colors: { [key: string]: string } = {
-            'received': '#64B5F6',    // Azul claro
-            'diagnosing': '#FFB74D',  // Naranja claro
-            'waiting_parts': '#81C784', // Verde claro
-            'repairing': '#FF8A65',   // Rojo claro
-            'repaired': '#4CAF50',    // Verde
-            'returned': '#9575CD',     // Violeta
-            'cancelled': '#E57373'     // Rojo
+            'received': '#86cecb',
+            'diagnosing': '#9ed8d5',
+            'waiting_parts': '#e12885',
+            'repairing': '#137a7f',
+            'repaired': '#59b7b3',
+            'returned': '#5f7f8a',
+            'cancelled': '#b55d8e'
         };
-        return colors[status] || '#999';
+        return colors[status] || '#86cecb';
     }
 
     getStatusLabel(status: string): string {
@@ -174,13 +176,7 @@ export class DashboardComponent {
     }
 
     formatDate(date: string): string {
-        return new Date(date).toLocaleDateString('es-AR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        return this.localeDate.formatDateTime(date);
     }
 
     // Navegación

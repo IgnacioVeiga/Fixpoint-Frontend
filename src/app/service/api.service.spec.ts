@@ -48,6 +48,7 @@ describe('ApiService', () => {
         request.params.get('status') === 'repairing' &&
         request.params.get('page') === '2' &&
         request.params.get('active') === 'true' &&
+        request.withCredentials &&
         !request.params.has('nullable') &&
         !request.params.has('missing')
     );

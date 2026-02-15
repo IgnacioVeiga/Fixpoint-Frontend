@@ -1,16 +1,29 @@
 {
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+      "name": "Frontend: Dev",
       "type": "chrome",
       "request": "launch",
-      "preLaunchTask": "npm: start",
+      "preLaunchTask": "npm: start:dev",
       "url": "http://localhost:4200/"
     },
     {
-      "name": "ng test",
+      "name": "Frontend: QA",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "npm: start:qa",
+      "url": "http://localhost:4200/"
+    },
+    {
+      "name": "Frontend: Mock",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "npm: start:mock",
+      "url": "http://localhost:4200/"
+    },
+    {
+      "name": "Frontend: Unit Tests",
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: test",

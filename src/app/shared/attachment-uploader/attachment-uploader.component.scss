@@ -1,14 +1,14 @@
 .attachment-uploader {
-    border: 1px dashed #9fbbb5;
+    border: 1px dashed var(--border);
     border-radius: 12px;
     padding: 0.85rem;
-    background: #f8fbfa;
+    background: var(--surface-soft);
     transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .attachment-uploader.drag-over {
-    border-color: #1f6f62;
-    background: #e7f4f0;
+    border-color: var(--primary);
+    background: var(--primary-soft);
 }
 
 .upload-zone {
@@ -33,14 +33,14 @@
 
 .upload-info,
 .size-info {
-    color: #586865;
+    color: var(--text-muted);
     font-size: 0.87rem;
 }
 
 .browse-btn {
     border: none;
     background: none;
-    color: #1f6f62;
+    color: var(--primary);
     font-weight: 700;
     text-decoration: underline;
     cursor: pointer;
@@ -50,7 +50,7 @@
 .file-type {
     display: inline-flex;
     border-radius: 999px;
-    background: #d8ece7;
+    background: var(--primary-soft);
     padding: 0.12rem 0.42rem;
     margin: 0.15rem;
     font-size: 0.78rem;
@@ -63,15 +63,15 @@
     justify-content: center;
     gap: 0.6rem;
     border-radius: 8px;
-    background: #dbede9;
-    color: #1f6f62;
+    background: var(--primary-soft);
+    color: var(--primary-strong);
     padding: 0.55rem;
 }
 
 .spinner {
     width: 16px;
     height: 16px;
-    border: 2px solid #1f6f62;
+    border: 2px solid var(--primary);
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -88,15 +88,15 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border: 1px solid #d4dfdb;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    background: #fff;
+    background: var(--surface);
     padding: 0.58rem 0.7rem;
     cursor: pointer;
 }
 
 .attachment-item:hover {
-    background: #f5faf8;
+    background: var(--table-row-hover);
 }
 
 .attachment-icon {
@@ -118,13 +118,13 @@
 
 .attachment-meta {
     font-size: 0.8rem;
-    color: #576864;
+    color: var(--text-muted);
 }
 
 .empty-files {
     margin-top: 0.7rem;
     font-size: 0.88rem;
-    color: #576864;
+    color: var(--text-muted);
 }
 
 @keyframes spin {

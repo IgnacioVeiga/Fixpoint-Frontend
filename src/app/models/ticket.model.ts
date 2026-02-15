@@ -1,5 +1,11 @@
 export type TicketStatus = 'received' | 'diagnosing' | 'waiting_parts' | 'repairing' | 'repaired' | 'returned' | 'cancelled';
 
+export interface TicketStatusDefinition {
+    value: TicketStatus;
+    closed: boolean;
+    nextStatuses: TicketStatus[];
+}
+
 export interface Ticket {
     id: number;
     clientId: number;

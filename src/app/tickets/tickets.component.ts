@@ -1,7 +1,22 @@
 import { Component, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { TicketsService } from '../service/tickets.service';
-import { Ticket } from '../models/ticket.model';
+import { Ticket, TicketStatus, TicketStatusDefinition } from '../models/ticket.model';
+import { LocaleDateService } from '../service/locale-date.service';
+
+type StatusFilterValue = 'all' | TicketStatus;
+type StatusFilterOption = { value: StatusFilterValue; label: string };
+
+const STATUS_LABELS: Record<TicketStatus, string> = {
+    received: 'Recibido',
+    diagnosing: 'Diagnostico',
+    waiting_parts: 'Esperando repuesto',
+    repairing: 'En reparacion',
+    repaired: 'Finalizado',
+    returned: 'Devuelto',
+    cancelled: 'Cancelado'
+};
 
 @Component({
     selector: 'app-tickets',
@@ -12,18 +27,21 @@ import { Ticket } from '../models/ticket.model';
 })
 export class TicketsComponent {
     private ticketService = inject(TicketsService);
+    private readonly localeDate = inject(LocaleDateService);
     tickets = signal<Ticket[]>([]);
+    statusDefinitions = signal<TicketStatusDefinition[]>(this.fallbackStatusDefinitions());
+    loading = signal(true);
+    loadError = signal<string | null>(null);
 
     search = signal('');
-    statusFilter = signal('all'); // 'all' | 'diagnosing' | 'repairing' | 'waiting_parts' | 'repaired'
-
-    estados = [
+    statusFilter = signal<StatusFilterValue>('all');
+    estados = computed<StatusFilterOption[]>(() => [
         { value: 'all', label: 'Todos' },
-        { value: 'diagnosing', label: 'Diagnóstico' },
-        { value: 'repairing', label: 'En reparación' },
-        { value: 'waiting_parts', label: 'Esperando repuesto' },
-        { value: 'repaired', label: 'Finalizado' },
-    ];
+        ...this.statusDefinitions().map((definition) => ({
+            value: definition.value,
+            label: STATUS_LABELS[definition.value]
+        }))
+    ]);
 
     filteredTickets = computed(() => {
         let list = this.tickets();
@@ -44,23 +62,23 @@ export class TicketsComponent {
     });
 
     getStatusLabel(status: string): string {
-        const found = this.estados.find(e => e.value === status);
-        return found ? found.label : status;
+        if (status in STATUS_LABELS) {
+            return STATUS_LABELS[status as TicketStatus];
+        }
+        return status;
     }
 
     formatEntryDate(value: string): string {
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            const [year, month, day] = value.split('-').map(Number);
-            return new Date(year, month - 1, day).toLocaleDateString();
-        }
-        return new Date(value).toLocaleDateString();
+        return this.localeDate.formatDateOnly(value);
     }
 
     constructor() {
-        // Carga inicial de tickets
-        this.ticketService.listTickets().subscribe(data => {
-            this.tickets.set(data);
-        });
+        this.loadStatusDefinitions();
+        this.loadTickets();
+    }
+
+    retryLoad(): void {
+        this.loadTickets();
     }
 
     deleteTicket(id: number) {
@@ -85,5 +103,59 @@ export class TicketsComponent {
             }
         }
         return fallback;
+    }
+
+    private loadStatusDefinitions(): void {
+        this.ticketService.listStatusDefinitions().subscribe({
+            next: (definitions) => {
+                this.statusDefinitions.set(definitions.length > 0 ? definitions : this.fallbackStatusDefinitions());
+                this.ensureStatusFilterValueIsValid();
+            },
+            error: (error) => {
+                console.error('Error loading status definitions:', error);
+                this.statusDefinitions.set(this.fallbackStatusDefinitions());
+                this.ensureStatusFilterValueIsValid();
+            }
+        });
+    }
+
+    private loadTickets(): void {
+        this.loading.set(true);
+        this.loadError.set(null);
+
+        this.ticketService.listTickets()
+            .pipe(finalize(() => this.loading.set(false)))
+            .subscribe({
+                next: (data) => this.tickets.set(data),
+                error: (error) => {
+                    console.error('Error loading tickets:', error);
+                    this.tickets.set([]);
+                    this.loadError.set(this.extractErrorMessage(error, 'Unable to load tickets.'));
+                }
+            });
+    }
+
+    private ensureStatusFilterValueIsValid(): void {
+        const filterValue = this.statusFilter();
+        if (filterValue === 'all') {
+            return;
+        }
+
+        const isValidStatus = this.statusDefinitions().some((definition) => definition.value === filterValue);
+        if (!isValidStatus) {
+            this.statusFilter.set('all');
+        }
+    }
+
+    private fallbackStatusDefinitions(): TicketStatusDefinition[] {
+        return [
+            { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+            { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+            { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+            { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+            { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+            { value: 'returned', closed: true, nextStatuses: [] },
+            { value: 'cancelled', closed: true, nextStatuses: [] }
+        ];
     }
 }

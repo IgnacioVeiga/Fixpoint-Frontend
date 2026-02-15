@@ -2,14 +2,24 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { SaveTicketRequest, Ticket } from '../models/ticket.model';
-import { MOCK_TICKETS } from '../models/mock-data/tickets.mock';
+import { SaveTicketRequest, Ticket, TicketStatusDefinition } from '../models/ticket.model';
+import { MOCK_TICKETS, MOCK_TICKET_STATUS_DEFINITIONS } from '../models/mock-data/tickets.mock';
 import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
   private readonly api = inject(ApiService);
   private readonly endpoint = 'tickets';
+
+  listStatusDefinitions(): Observable<TicketStatusDefinition[]> {
+    if (environment.useMockFallback) {
+      return of(MOCK_TICKET_STATUS_DEFINITIONS);
+    }
+
+    return this.api.get<TicketStatusDefinition[]>(`${this.endpoint}/statuses`).pipe(
+      catchError((error) => this.handleError(error, 'Error al listar estados de ticket'))
+    );
+  }
 
   listTickets(): Observable<Ticket[]> {
     if (environment.useMockFallback) {

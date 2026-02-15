@@ -65,7 +65,7 @@
     <div>
       <label>Estado</label>
       <select formControlName="status" required>
-        @for (status of statusOptions; track status.value) {
+        @for (status of statusOptions(); track status.value) {
           <option [value]="status.value">{{ status.label }}</option>
         }
       </select>

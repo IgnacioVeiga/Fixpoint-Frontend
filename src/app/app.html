@@ -8,10 +8,22 @@
     <span class="badge" [class.badge-mock]="mockMode" [class.badge-real]="!mockMode">
       {{ mockMode ? 'Modo Mock' : 'Backend Real' }}
     </span>
+    <span class="badge badge-user" *ngIf="isAuthenticated()">
+      {{ session()?.username }} · {{ session()?.role }}
+    </span>
+    <button class="session-btn" type="button" *ngIf="isAuthenticated()" (click)="logout()">
+      Logout
+    </button>
+    <a class="session-link" routerLink="/login" *ngIf="!isAuthenticated() && !isLoginRoute()">
+      Login
+    </a>
+    <button class="theme-toggle" type="button" (click)="toggleTheme()">
+      {{ isDarkTheme ? 'Dark mode' : 'Light mode' }}
+    </button>
   </div>
 </header>
 
-<nav class="main-nav">
+<nav class="main-nav" *ngIf="showNavigation()">
   <a [routerLink]="'/'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Panel</a>
   <a [routerLink]="'/tickets'" routerLinkActive="active">Tickets</a>
   <a [routerLink]="'/inventario'" routerLinkActive="active">Inventario</a>
@@ -19,6 +31,6 @@
   <a [routerLink]="'/tickets/nuevo'" class="quick-link">+ Ticket</a>
 </nav>
 
-<main class="app-content">
+<main class="app-content" [class.app-content-auth]="!showNavigation()">
   <router-outlet />
 </main>

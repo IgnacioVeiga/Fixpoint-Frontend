@@ -1,22 +1,40 @@
 # Fixpoint Frontend
 
-## Entornos
+Angular client for workshop operations. It supports real backend environments and a mock-only mode for demos.
 
-El frontend soporta:
+## Scope
 
-- `dev`
-- `qa`
-- `prod`
-- `mock`
+- Environments: `dev`, `qa`, `prod`, `mock`
+- Routing + guards for protected pages
+- Auth integration with backend refresh-cookie model
 
-Archivos:
+## Quick Start
 
-- `src/environments/environment.ts`
-- `src/environments/environment.qa.ts`
-- `src/environments/environment.prod.ts`
-- `src/environments/environment.mock.ts`
+```bash
+npm install
+npm run start:dev
+```
 
-## Scripts útiles
+## Documentation Index
+
+- `docs/DEVELOPMENT_SETUP.md` - setup and run modes
+- `docs/ENVIRONMENTS.md` - `environment*.ts` strategy and expected values
+- `docs/AUTH_FLOW.md` - login/refresh/logout behavior in frontend
+- `docs/PROJECT_MAP.md` - where to find key frontend modules
+- `docs/TROUBLESHOOTING.md` - common integration and runtime issues
+- `BRANCH_PROTECTION_CHECKLIST.md` - repository governance checklist
+
+## Environment Strategy
+
+- Frontend does not use runtime `.env` files.
+- Configuration is compile-time via `src/environments/environment*.ts`.
+
+## VS Code Helpers
+
+- `.vscode/tasks.json` includes shortcuts for common npm scripts.
+- `.vscode/launch.json` includes launch profiles that run npm tasks and open the app/tests in browser.
+
+## Useful Scripts
 
 ```bash
 npm run start:dev
@@ -26,32 +44,12 @@ npm run start:mock
 npm run build
 npm run build:qa
 npm run build:mock
+
 npm run test
 npm run test:ci
 ```
 
-## IntelliJ IDEA
-
-Run configurations compartidas en `.run/`:
-
-- `Frontend - Dev`
-- `Frontend - QA`
-- `Frontend - Mock`
-- `Frontend - Build QA`
-- `Frontend - Build Mock`
-
-## Notas
-
-- En `mock`, los servicios usan fallback local (`useMockFallback: true`).
-- En `dev/qa/prod`, consume backend real vía `apiBaseUrl`.
-
-## Unit tests included
-
-- `api.service.spec.ts`: URL resolution and query params normalization.
-- `tickets.service.spec.ts`: service behavior with mocked `ApiService`.
-
-For `test:ci`, a Chrome/Chromium binary is required (`CHROME_BIN`).
-
 ## CI
 
-GitHub Actions workflow: `.github/workflows/ci.yml` installs Chrome, runs unit tests, and builds the app on push/PR.
+- Workflow: `.github/workflows/ci.yml`
+- Trigger policy: runs on commits to `main`

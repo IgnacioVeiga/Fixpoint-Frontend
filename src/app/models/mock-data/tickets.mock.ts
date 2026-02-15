@@ -1,4 +1,14 @@
-import { Ticket } from '../ticket.model';
+import { Ticket, TicketStatusDefinition } from '../ticket.model';
+
+export const MOCK_TICKET_STATUS_DEFINITIONS: TicketStatusDefinition[] = [
+    { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+    { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+    { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+    { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+    { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+    { value: 'returned', closed: true, nextStatuses: [] },
+    { value: 'cancelled', closed: true, nextStatuses: [] }
+];
 
 export const MOCK_TICKETS: Ticket[] = [
     {

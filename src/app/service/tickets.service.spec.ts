@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 import { TicketsService } from './tickets.service';
-import { SaveTicketRequest, Ticket } from '../models/ticket.model';
+import { SaveTicketRequest, Ticket, TicketStatusDefinition } from '../models/ticket.model';
 
 describe('TicketsService', () => {
   let service: TicketsService;
@@ -24,6 +24,16 @@ describe('TicketsService', () => {
     lastUpdated: '2026-02-14T10:00:00Z'
   };
 
+  const statusDefinitions: TicketStatusDefinition[] = [
+    { value: 'received', closed: false, nextStatuses: ['diagnosing', 'cancelled'] },
+    { value: 'diagnosing', closed: false, nextStatuses: ['waiting_parts', 'repairing', 'cancelled'] },
+    { value: 'waiting_parts', closed: false, nextStatuses: ['repairing', 'cancelled'] },
+    { value: 'repairing', closed: false, nextStatuses: ['waiting_parts', 'repaired', 'cancelled'] },
+    { value: 'repaired', closed: false, nextStatuses: ['returned', 'cancelled'] },
+    { value: 'returned', closed: true, nextStatuses: [] },
+    { value: 'cancelled', closed: true, nextStatuses: [] }
+  ];
+
   beforeEach(() => {
     apiSpy = jasmine.createSpyObj<ApiService>('ApiService', ['get', 'post', 'put', 'delete']);
 
@@ -40,6 +50,16 @@ describe('TicketsService', () => {
     service.listTickets().subscribe(tickets => {
       expect(tickets).toEqual([baseTicket]);
       expect(apiSpy.get).toHaveBeenCalledWith('tickets');
+      done();
+    });
+  });
+
+  it('should request ticket status definitions from the API endpoint', (done) => {
+    apiSpy.get.and.returnValue(of(statusDefinitions));
+
+    service.listStatusDefinitions().subscribe((definitions) => {
+      expect(definitions).toEqual(statusDefinitions);
+      expect(apiSpy.get).toHaveBeenCalledWith('tickets/statuses');
       done();
     });
   });

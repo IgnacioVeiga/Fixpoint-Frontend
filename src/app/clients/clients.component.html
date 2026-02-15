@@ -1,14 +1,25 @@
 <section class="page-head">
   <div>
     <h1>Clientes</h1>
-    <p class="page-subtitle">
-      {{ filteredClients().length }} visibles de {{ clients().length }} registros
-    </p>
+    @if (loading()) {
+      <p class="page-subtitle">Loading clients...</p>
+    } @else {
+      <p class="page-subtitle">
+        {{ filteredClients().length }} visible out of {{ clients().length }} total
+      </p>
+    }
   </div>
   <a [routerLink]="'/clientes/nuevo'" class="btn">+ Nuevo cliente</a>
 </section>
 
 <section class="table-card">
+  @if (loadError()) {
+    <div class="inline-alert inline-alert-error">
+      <span>{{ loadError() }}</span>
+      <button class="btn-inline" type="button" (click)="retryLoad()">Retry</button>
+    </div>
+  }
+
   <div class="toolbar">
     <div class="field grow-2">
       <label for="client-search">Buscar</label>
@@ -35,7 +46,11 @@
       </tr>
     </thead>
     <tbody>
-      @if (filteredClients().length === 0) {
+      @if (loading()) {
+        <tr>
+          <td colspan="7" class="empty-cell">Loading data...</td>
+        </tr>
+      } @else if (filteredClients().length === 0) {
         <tr>
           <td colspan="7" class="empty-cell">No hay clientes para el filtro actual.</td>
         </tr>

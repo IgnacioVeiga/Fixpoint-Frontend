@@ -45,7 +45,7 @@
           <div class="attachment-info">
             <span class="attachment-name">{{ attachment.filename }}</span>
             <span class="attachment-meta">
-              {{ attachment.fileType }} • {{ attachment.uploadedAt | date : "short" }}
+              {{ attachment.fileType }} • {{ formatAttachmentDate(attachment.uploadedAt) }}
             </span>
           </div>
           <button class="delete-btn" type="button" (click)="deleteAttachment(attachment, $event)">Eliminar</button>

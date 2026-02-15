@@ -1,0 +1,38 @@
+<section class="auth-shell">
+  <article class="auth-card">
+    <header class="auth-header">
+      <h1>Workshop Access</h1>
+      <p>Sign in to continue managing tickets, inventory, and clients.</p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username" autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" autocomplete="current-password" />
+      </div>
+
+      <label class="remember-me">
+        <input type="checkbox" formControlName="rememberMe" />
+        <span>Keep session for 30 days</span>
+      </label>
+
+      <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+
+      <button class="btn auth-submit" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+
+    <footer class="auth-footer">
+      <span class="badge badge-env">{{ environmentName }}</span>
+      <span class="badge" [class.badge-mock]="mockMode" [class.badge-real]="!mockMode">
+        {{ mockMode ? 'Mock mode' : 'Backend mode' }}
+      </span>
+    </footer>
+  </article>
+</section>

@@ -4,7 +4,7 @@
 
 - Node.js (LTS recommended)
 - npm
-- Optional: IntelliJ IDEA
+- Optional: VS Code
 
 ## 2. Install Dependencies
 
@@ -55,3 +55,8 @@ If backend is on another host, ensure `apiBaseUrl` in the selected environment f
 - `docs/AUTH_FLOW.md` for login/refresh/logout flow
 - `docs/PROJECT_MAP.md` for code navigation
 - `docs/TROUBLESHOOTING.md` for CORS/cookie/auth integration errors
+
+## 8. VS Code Shortcuts (Optional)
+
+- Use `Terminal > Run Task` to execute predefined scripts from `.vscode/tasks.json`.
+- Use `Run and Debug` to start launch profiles from `.vscode/launch.json`.

@@ -29,13 +29,10 @@ npm run start:dev
 - Frontend does not use runtime `.env` files.
 - Configuration is compile-time via `src/environments/environment*.ts`.
 
-## Shared IntelliJ Run Configurations
+## VS Code Helpers
 
-- `Frontend - Dev`
-- `Frontend - QA`
-- `Frontend - Mock`
-- `Frontend - Build QA`
-- `Frontend - Build Mock`
+- `.vscode/tasks.json` includes shortcuts for common npm scripts.
+- `.vscode/launch.json` includes launch profiles that run npm tasks and open the app/tests in browser.
 
 ## Useful Scripts
 

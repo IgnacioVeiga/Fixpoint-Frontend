@@ -2,11 +2,11 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
+import { AuthSessionService } from './service/auth-session.service';
 
 describe('App', () => {
   beforeEach(async () => {
     localStorage.removeItem('fixpoint-theme');
-    localStorage.removeItem('fixpoint-auth-session');
 
     await TestBed.configureTestingModule({
       imports: [App],
@@ -28,18 +28,15 @@ describe('App', () => {
   });
 
   it('should render main navigation when session is active', () => {
-    localStorage.setItem(
-      'fixpoint-auth-session',
-      JSON.stringify({
-        tokenType: 'Bearer',
-        accessToken: 'token-123',
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-        username: 'tech-user',
-        role: 'TECH'
-      })
-    );
-
     const fixture = TestBed.createComponent(App);
+    const sessionStore = TestBed.inject(AuthSessionService);
+    sessionStore.setSession({
+      tokenType: 'Bearer',
+      accessToken: 'token-123',
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      username: 'tech-user',
+      role: 'TECH'
+    });
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 

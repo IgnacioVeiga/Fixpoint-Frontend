@@ -26,7 +26,8 @@ export class LoginComponent {
 
   readonly form = this.formBuilder.nonNullable.group({
     username: ['', Validators.required],
-    password: ['', Validators.required]
+    password: ['', Validators.required],
+    rememberMe: [false]
   });
 
   submit(): void {

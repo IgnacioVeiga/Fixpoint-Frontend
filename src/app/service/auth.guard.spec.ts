@@ -8,8 +8,6 @@ describe('authGuard', () => {
   let sessionStore: AuthSessionService;
 
   beforeEach(() => {
-    localStorage.removeItem('fixpoint-auth-session');
-
     TestBed.configureTestingModule({
       providers: [provideRouter([]), AuthSessionService]
     });

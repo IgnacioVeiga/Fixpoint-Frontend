@@ -13,8 +13,6 @@ describe('AuthService', () => {
   const apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
 
   beforeEach(() => {
-    localStorage.removeItem('fixpoint-auth-session');
-
     TestBed.configureTestingModule({
       providers: [AuthService, ApiService, AuthSessionService, provideHttpClient(), provideHttpClientTesting()]
     });
@@ -41,8 +39,10 @@ describe('AuthService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       username: 'tech-user',
-      password: 'pass-1234'
+      password: 'pass-1234',
+      rememberMe: false
     });
+    expect(req.request.withCredentials).toBeTrue();
 
     req.flush({
       tokenType: 'Bearer',
@@ -57,7 +57,7 @@ describe('AuthService', () => {
     expect(sessionStore.getAccessToken()).toBe('token-123');
   });
 
-  it('should clear session on logout', () => {
+  it('should call backend logout and clear session', () => {
     sessionStore.setSession({
       tokenType: 'Bearer',
       accessToken: 'token-logout',
@@ -66,9 +66,40 @@ describe('AuthService', () => {
       role: 'TECH'
     });
 
-    service.logout();
+    let completed = false;
+    service.logout().subscribe(() => {
+      completed = true;
+    });
 
+    const req = httpMock.expectOne(`${apiBaseUrl}/auth/logout`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush({});
+
+    expect(completed).toBeTrue();
     expect(sessionStore.isAuthenticated()).toBeFalse();
     expect(sessionStore.getAccessToken()).toBeNull();
+  });
+
+  it('should refresh session using cookie-based backend endpoint', () => {
+    let refreshedUsername = '';
+
+    service.refreshSession().subscribe((session) => {
+      refreshedUsername = session.username;
+    });
+
+    const req = httpMock.expectOne(`${apiBaseUrl}/auth/refresh`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush({
+      tokenType: 'Bearer',
+      accessToken: 'token-refresh',
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      username: 'refreshed-tech',
+      role: 'TECH'
+    });
+
+    expect(refreshedUsername).toBe('refreshed-tech');
+    expect(sessionStore.getAccessToken()).toBe('token-refresh');
   });
 });

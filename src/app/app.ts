@@ -54,8 +54,11 @@ export class App {
   }
 
   logout(): void {
-    this.authService.logout();
-    void this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => {
+        void this.router.navigate(['/login']);
+      }
+    });
   }
 
   private getInitialTheme(): ThemeMode {

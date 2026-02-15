@@ -5,8 +5,6 @@ describe('AuthSessionService', () => {
   let service: AuthSessionService;
 
   beforeEach(() => {
-    localStorage.removeItem('fixpoint-auth-session');
-
     TestBed.configureTestingModule({
       providers: [AuthSessionService]
     });
@@ -27,26 +25,21 @@ describe('AuthSessionService', () => {
 
     expect(service.session()).toEqual(session);
     expect(service.isAuthenticated()).toBeTrue();
-    expect(localStorage.getItem('fixpoint-auth-session')).toContain('token-123');
   });
 
-  it('should clear expired session loaded from storage', () => {
-    localStorage.setItem(
-      'fixpoint-auth-session',
-      JSON.stringify({
-        tokenType: 'Bearer',
-        accessToken: 'expired-token',
-        expiresAt: new Date(Date.now() - 60 * 1000).toISOString(),
-        username: 'tech-user',
-        role: 'TECH'
-      })
-    );
+  it('should reject expired session values', () => {
+    service = TestBed.inject(AuthSessionService);
 
-    const reloaded = TestBed.inject(AuthSessionService);
+    service.setSession({
+      tokenType: 'Bearer',
+      accessToken: 'expired-token',
+      expiresAt: new Date(Date.now() - 60 * 1000).toISOString(),
+      username: 'tech-user',
+      role: 'TECH'
+    });
 
-    expect(reloaded.session()).toBeNull();
-    expect(reloaded.isAuthenticated()).toBeFalse();
-    expect(localStorage.getItem('fixpoint-auth-session')).toBeNull();
+    expect(service.session()).toBeNull();
+    expect(service.isAuthenticated()).toBeFalse();
   });
 
   it('should clear session data', () => {
@@ -64,6 +57,5 @@ describe('AuthSessionService', () => {
 
     expect(service.session()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
-    expect(localStorage.getItem('fixpoint-auth-session')).toBeNull();
   });
 });

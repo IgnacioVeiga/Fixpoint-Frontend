@@ -12,19 +12,25 @@ export class ApiService {
   private readonly baseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
 
   get<T>(endpoint: string, params?: HttpParamMap): Observable<T> {
-    return this.http.get<T>(this.buildUrl(endpoint), { params: this.toHttpParams(params) });
+    return this.http.get<T>(this.buildUrl(endpoint), {
+      params: this.toHttpParams(params),
+      withCredentials: true
+    });
   }
 
   post<T>(endpoint: string, body: unknown): Observable<T> {
-    return this.http.post<T>(this.buildUrl(endpoint), body);
+    return this.http.post<T>(this.buildUrl(endpoint), body, { withCredentials: true });
   }
 
   put<T>(endpoint: string, body: unknown): Observable<T> {
-    return this.http.put<T>(this.buildUrl(endpoint), body);
+    return this.http.put<T>(this.buildUrl(endpoint), body, { withCredentials: true });
   }
 
   delete<T>(endpoint: string, params?: HttpParamMap): Observable<T> {
-    return this.http.delete<T>(this.buildUrl(endpoint), { params: this.toHttpParams(params) });
+    return this.http.delete<T>(this.buildUrl(endpoint), {
+      params: this.toHttpParams(params),
+      withCredentials: true
+    });
   }
 
   resolveUrl(endpoint: string): string {

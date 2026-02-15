@@ -16,6 +16,11 @@
         <input id="password" type="password" formControlName="password" autocomplete="current-password" />
       </div>
 
+      <label class="remember-me">
+        <input type="checkbox" formControlName="rememberMe" />
+        <span>Keep session for 30 days</span>
+      </label>
+
       <p class="error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
 
       <button class="btn auth-submit" type="submit" [disabled]="submitting()">

@@ -13,8 +13,6 @@ describe('authInterceptor', () => {
   const apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
 
   beforeEach(() => {
-    localStorage.removeItem('fixpoint-auth-session');
-
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
@@ -46,6 +44,7 @@ describe('authInterceptor', () => {
 
     const req = httpMock.expectOne(`${apiBaseUrl}/tickets`);
     expect(req.request.headers.get('Authorization')).toBe('Bearer token-abc');
+    expect(req.request.withCredentials).toBeTrue();
     req.flush([]);
   });
 
@@ -62,6 +61,7 @@ describe('authInterceptor', () => {
 
     const req = httpMock.expectOne(`${apiBaseUrl}/auth/login`);
     expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.withCredentials).toBeTrue();
     req.flush({
       tokenType: 'Bearer',
       accessToken: 'new-token',
@@ -71,7 +71,46 @@ describe('authInterceptor', () => {
     });
   });
 
-  it('should clear local session after unauthorized response', () => {
+  it('should refresh and retry a protected request after unauthorized response', () => {
+    sessionStore.setSession({
+      tokenType: 'Bearer',
+      accessToken: 'token-expire',
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      username: 'tech-user',
+      role: 'TECH'
+    });
+
+    let completed = false;
+    http.get(`${apiBaseUrl}/tickets`).subscribe({
+      next: () => {
+        completed = true;
+      }
+    });
+
+    const firstRequest = httpMock.expectOne(`${apiBaseUrl}/tickets`);
+    expect(firstRequest.request.headers.get('Authorization')).toBe('Bearer token-expire');
+    firstRequest.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+    const refreshRequest = httpMock.expectOne(`${apiBaseUrl}/auth/refresh`);
+    expect(refreshRequest.request.method).toBe('POST');
+    expect(refreshRequest.request.withCredentials).toBeTrue();
+    refreshRequest.flush({
+      tokenType: 'Bearer',
+      accessToken: 'token-new',
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      username: 'tech-user',
+      role: 'TECH'
+    });
+
+    const retriedRequest = httpMock.expectOne(`${apiBaseUrl}/tickets`);
+    expect(retriedRequest.request.headers.get('Authorization')).toBe('Bearer token-new');
+    retriedRequest.flush([]);
+
+    expect(completed).toBeTrue();
+    expect(sessionStore.getAccessToken()).toBe('token-new');
+  });
+
+  it('should clear local session if refresh request fails', () => {
     sessionStore.setSession({
       tokenType: 'Bearer',
       accessToken: 'token-expire',
@@ -87,7 +126,10 @@ describe('authInterceptor', () => {
       }
     });
 
-    const req = httpMock.expectOne(`${apiBaseUrl}/tickets`);
-    req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+    const firstRequest = httpMock.expectOne(`${apiBaseUrl}/tickets`);
+    firstRequest.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
+
+    const refreshRequest = httpMock.expectOne(`${apiBaseUrl}/auth/refresh`);
+    refreshRequest.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
   });
 });

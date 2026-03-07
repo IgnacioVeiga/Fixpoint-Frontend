@@ -92,13 +92,27 @@ export class AttachmentUploaderComponent implements OnChanges {
     }
   }
 
-  previewFile(attachment: Attachment): void {
+  async previewFile(attachment: Attachment): Promise<void> {
     if (this.attachmentService.isMockMode()) {
       alert('La previsualización no está disponible en modo mock.');
       return;
     }
 
-    window.open(this.attachmentService.getDownloadUrl(attachment.id), '_blank', 'noopener');
+    try {
+      const fileBlob = await firstValueFrom(this.attachmentService.downloadAttachment(attachment.id));
+      const objectUrl = URL.createObjectURL(fileBlob);
+      const downloadLink = document.createElement('a');
+      downloadLink.href = objectUrl;
+      downloadLink.download = attachment.filename;
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      console.error('Error al descargar archivo:', error);
+      alert(this.extractErrorMessage(error, 'Error al descargar el archivo.'));
+    }
   }
 
   deleteAttachment(attachment: Attachment, event: Event): void {

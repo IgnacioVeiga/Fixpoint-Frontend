@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
@@ -8,6 +9,7 @@ import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AttachmentsService {
+  private readonly http = inject(HttpClient);
   private readonly api = inject(ApiService);
   private readonly mockAttachmentsByTicket = new Map<number, Attachment[]>();
 
@@ -86,6 +88,19 @@ export class AttachmentsService {
 
   getDownloadUrl(id: number): string {
     return this.api.resolveUrl(`attachments/download/${id}`);
+  }
+
+  downloadAttachment(id: number): Observable<Blob> {
+    if (environment.useMockFallback) {
+      return throwError(() => new Error('La descarga no está disponible en modo mock.'));
+    }
+
+    return this.http
+      .get(this.getDownloadUrl(id), {
+        responseType: 'blob',
+        withCredentials: true
+      })
+      .pipe(catchError((error) => this.handleError(error, `Error al descargar adjunto ${id}`)));
   }
 
   private findMockAttachmentById(id: number): Attachment | undefined {

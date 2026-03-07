@@ -7,13 +7,29 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <div class="field">
-        <label for="username">Username</label>
-        <input id="username" type="text" formControlName="username" autocomplete="username" />
+        <label for="username" class="label-required">Username</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          autocomplete="username"
+          required
+          [maxlength]="usernameMaxLength"
+        />
+        @if (form.get('username')?.touched && form.get('username')?.hasError('required')) {
+          <span class="error">Username is required.</span>
+        }
+        @if (form.get('username')?.touched && form.get('username')?.hasError('maxlength')) {
+          <span class="error">Maximum {{ usernameMaxLength }} characters.</span>
+        }
       </div>
 
       <div class="field">
-        <label for="password">Password</label>
-        <input id="password" type="password" formControlName="password" autocomplete="current-password" />
+        <label for="password" class="label-required">Password</label>
+        <input id="password" type="password" formControlName="password" autocomplete="current-password" required />
+        @if (form.get('password')?.touched && form.get('password')?.hasError('required')) {
+          <span class="error">Password is required.</span>
+        }
       </div>
 
       <label class="remember-me">

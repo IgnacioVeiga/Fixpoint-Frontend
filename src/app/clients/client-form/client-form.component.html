@@ -15,7 +15,7 @@
 }
 <form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
-    <label>Nombre</label>
+    <label class="label-required">Nombre</label>
     <input formControlName="name" required />
     @if (form.get('name')?.touched && form.get('name')?.invalid) {
       <span class="error">Nombre requerido (mínimo 3 letras)</span>
@@ -23,11 +23,17 @@
   </div>
   <div>
     <label>DNI</label>
-    <input formControlName="dni" />
+    <input formControlName="dni" [maxlength]="dniMaxLength" />
+    @if (form.get('dni')?.touched && form.get('dni')?.hasError('maxlength')) {
+      <span class="error">Máximo {{ dniMaxLength }} caracteres</span>
+    }
   </div>
   <div>
     <label>Teléfono</label>
-    <input formControlName="phone" />
+    <input formControlName="phone" [maxlength]="phoneMaxLength" />
+    @if (form.get('phone')?.touched && form.get('phone')?.hasError('maxlength')) {
+      <span class="error">Máximo {{ phoneMaxLength }} caracteres</span>
+    }
   </div>
   <div>
     <label>Email</label>

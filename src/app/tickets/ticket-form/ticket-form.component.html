@@ -13,7 +13,7 @@
 <form class="ticket-main-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div class="ticket-grid">
     <div>
-      <label>Cliente</label>
+      <label class="label-required">Cliente</label>
       <select formControlName="clientId" required>
         <option value="">Seleccionar cliente...</option>
         @for (client of clients(); track client.id) {
@@ -27,7 +27,7 @@
     </div>
 
     <div>
-      <label>Tipo de equipo</label>
+      <label class="label-required">Tipo de equipo</label>
       <input formControlName="deviceType" required />
       @if (form.get('deviceType')?.touched && form.get('deviceType')?.invalid) {
         <span class="error">Requerido</span>
@@ -50,12 +50,15 @@
     </div>
 
     <div>
-      <label>Fecha de ingreso</label>
+      <label class="label-required">Fecha de ingreso</label>
       <input type="date" formControlName="entryDate" required />
+      @if (form.get('entryDate')?.touched && form.get('entryDate')?.invalid) {
+        <span class="error">Fecha requerida</span>
+      }
     </div>
 
     <div class="full-row">
-      <label>Descripción del problema</label>
+      <label class="label-required">Descripción del problema</label>
       <textarea formControlName="problemDescription" required></textarea>
       @if (form.get('problemDescription')?.touched && form.get('problemDescription')?.invalid) {
         <span class="error">Requerido</span>
@@ -63,12 +66,15 @@
     </div>
 
     <div>
-      <label>Estado</label>
+      <label class="label-required">Estado</label>
       <select formControlName="status" required>
         @for (status of statusOptions(); track status.value) {
           <option [value]="status.value">{{ status.label }}</option>
         }
       </select>
+      @if (form.get('status')?.touched && form.get('status')?.invalid) {
+        <span class="error">Estado requerido</span>
+      }
     </div>
 
     <div>
@@ -92,8 +98,11 @@
       <form class="section-form" [formGroup]="logForm" (ngSubmit)="addLog()" novalidate>
         <div class="section-form-grid">
           <div class="full-row">
-            <label>Descripción</label>
+            <label class="label-required">Descripción</label>
             <textarea formControlName="description" required></textarea>
+            @if (logForm.get('description')?.touched && logForm.get('description')?.invalid) {
+              <span class="error">Descripción requerida</span>
+            }
           </div>
           <div>
             <label>Autor</label>
@@ -136,17 +145,23 @@
       <form class="section-form" [formGroup]="partForm" (ngSubmit)="addPart()" novalidate>
         <div class="section-form-grid">
           <div>
-            <label>Componente</label>
+            <label class="label-required">Componente</label>
             <select formControlName="inventoryId" required>
               <option value="">Seleccionar componente...</option>
               @for (item of inventoryItems(); track item.id) {
                 <option [value]="item.id">{{ item.name }} (stock: {{ item.quantity }})</option>
               }
             </select>
+            @if (partForm.get('inventoryId')?.touched && partForm.get('inventoryId')?.invalid) {
+              <span class="error">Componente requerido</span>
+            }
           </div>
           <div>
-            <label>Cantidad</label>
+            <label class="label-required">Cantidad</label>
             <input type="number" min="1" formControlName="quantity" required />
+            @if (partForm.get('quantity')?.touched && partForm.get('quantity')?.invalid) {
+              <span class="error">Cantidad mínima: 1</span>
+            }
           </div>
           <div class="full-row">
             <label>Nota</label>

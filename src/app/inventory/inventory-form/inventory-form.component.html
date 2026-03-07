@@ -15,7 +15,7 @@
 }
 <form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
   <div>
-    <label>Nombre</label>
+    <label class="label-required">Nombre</label>
     <input formControlName="name" required />
     @if (form.get('name')?.touched && form.get('name')?.invalid) {
       <span class="error">Nombre requerido (mínimo 2 letras)</span>
@@ -30,19 +30,22 @@
     <input formControlName="description" />
   </div>
   <div>
-    <label>Condición</label>
+    <label class="label-required">Condición</label>
     <select formControlName="condition" required>
       @for (c of conditions; track c.value) {
         <option [value]="c.value">{{ c.label }}</option>
       }
     </select>
+    @if (form.get('condition')?.touched && form.get('condition')?.invalid) {
+      <span class="error">Condición requerida</span>
+    }
   </div>
   <div>
     <label>Fuente</label>
     <input formControlName="source" />
   </div>
   <div>
-    <label>Cantidad</label>
+    <label class="label-required">Cantidad</label>
     <input type="number" formControlName="quantity" min="1" required />
     @if (form.get('quantity')?.touched && form.get('quantity')?.invalid) {
       <span class="error">Cantidad mínima: 1</span>

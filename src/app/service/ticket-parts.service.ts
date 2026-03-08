@@ -11,7 +11,7 @@ export class TicketPartsService {
   private readonly mockPartsByTicket = new Map<number, TicketPart[]>();
 
   listTicketParts(ticketId: number): Observable<TicketPart[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(this.mockPartsByTicket.get(ticketId) ?? []);
     }
 
@@ -21,7 +21,7 @@ export class TicketPartsService {
   }
 
   createTicketPart(ticketId: number, part: AddTicketPartRequest): Observable<TicketPart> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const existingParts = this.mockPartsByTicket.get(ticketId) ?? [];
       const newPart: TicketPart = {
         id: Date.now(),

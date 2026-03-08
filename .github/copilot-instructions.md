@@ -40,9 +40,9 @@ Human onboarding and product documentation are in `docs/`.
 
 ## 5. Environment Rules
 
-- `dev`, `qa`, `prod` must target real backend integration (`useMockFallback: false`).
-- `mock` is frontend-only fallback mode (`useMockFallback: true`).
-- `prod` commonly uses relative API base URL (`/api`) for reverse-proxy deployment.
+- `dev`, `qa`, `prod` must target real backend integration (`useMockApi: false`).
+- `mock` is frontend-only fallback mode (`useMockApi: true`).
+- `prod` commonly uses relative API base URL (`/api/v1`) for reverse-proxy deployment.
 
 ## 6. Change Policy for LLMs
 

@@ -19,34 +19,34 @@ Each file defines:
   - One of: `dev`, `qa`, `prod`, `mock`
 - `apiBaseUrl`
   - Base URL for API calls
-- `useMockFallback`
+- `useMockApi`
   - `true` only for mock mode
 
 ## Recommended Values
 
 ### `dev`
 
-- `apiBaseUrl`: `http://localhost:8080/api`
-- `useMockFallback`: `false`
+- `apiBaseUrl`: `http://localhost:8080/api/v1`
+- `useMockApi`: `false`
 
 ### `qa`
 
 - `apiBaseUrl`: QA API URL
-- `useMockFallback`: `false`
+- `useMockApi`: `false`
 
 ### `prod`
 
 - Usually behind reverse proxy:
-  - `apiBaseUrl`: `/api`
-- `useMockFallback`: `false`
+  - `apiBaseUrl`: `/api/v1`
+- `useMockApi`: `false`
 
 ### `mock`
 
-- `useMockFallback`: `true`
+- `useMockApi`: `true`
 - Backend is optional
 
 ## Notes
 
 - If frontend and backend are served from different origins, backend CORS and cookie policy must match that setup.
 - For long-term maintainability, keep environment files explicit and avoid hidden defaults.
-- Keep `mock` explicitly isolated (`useMockFallback=true`) so real envs always use backend integration.
+- Keep `mock` explicitly isolated (`useMockApi=true`) so real envs always use backend integration.

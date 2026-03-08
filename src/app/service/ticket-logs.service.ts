@@ -11,7 +11,7 @@ export class TicketLogsService {
   private readonly mockLogsByTicket = new Map<number, TicketLog[]>();
 
   listTicketLogs(ticketId: number): Observable<TicketLog[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(this.mockLogsByTicket.get(ticketId) ?? []);
     }
 
@@ -21,7 +21,7 @@ export class TicketLogsService {
   }
 
   createTicketLog(ticketId: number, log: CreateTicketLogRequest): Observable<TicketLog> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const existingLogs = this.mockLogsByTicket.get(ticketId) ?? [];
       const newLog: TicketLog = {
         id: Date.now(),

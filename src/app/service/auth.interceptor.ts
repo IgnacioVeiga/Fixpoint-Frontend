@@ -18,21 +18,23 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
   const isApiRequest = request.url.startsWith(apiBaseUrl);
   const isAuthRequest = AUTH_ENDPOINTS.some((endpoint) => request.url.endsWith(endpoint));
+  const requestWithCredentials =
+    isApiRequest && !request.withCredentials ? request.clone({ withCredentials: true }) : request;
 
   const requestWithAuth =
     token && isApiRequest && !isAuthRequest
-      ? request.clone({
+      ? requestWithCredentials.clone({
           setHeaders: {
             Authorization: `Bearer ${token}`
           }
         })
-      : request;
+      : requestWithCredentials;
 
   return next(requestWithAuth).pipe(
     catchError((error: HttpErrorResponse) => {
-      const alreadyRetried = request.headers.has(RETRY_MARKER_HEADER);
+      const alreadyRetried = requestWithAuth.headers.has(RETRY_MARKER_HEADER);
 
-      if (error.status === 401 && !isAuthRequest && !alreadyRetried && !environment.useMockFallback) {
+      if (error.status === 401 && !isAuthRequest && !alreadyRetried && !environment.useMockApi) {
         return authService.refreshSession().pipe(
           switchMap(() => {
             const refreshedToken = sessionStore.getAccessToken();
@@ -42,7 +44,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
               return throwError(() => error);
             }
 
-            const retriedRequest = request.clone({
+            const retriedRequest = requestWithAuth.clone({
               setHeaders: {
                 Authorization: `Bearer ${refreshedToken}`,
                 [RETRY_MARKER_HEADER]: '1'

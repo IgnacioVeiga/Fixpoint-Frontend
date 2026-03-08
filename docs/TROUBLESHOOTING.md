@@ -43,10 +43,10 @@ Common issues when integrating frontend with backend environments.
 ### Expected Behavior
 
 - In `mock` environment:
-  - `useMockFallback=true`
+  - `useMockApi=true`
   - frontend can work without backend
 - In `dev/qa/prod`:
-  - `useMockFallback=false`
+  - `useMockApi=false`
   - backend integration is expected
 
 ## 6. Local Network (LAN) Access Fails

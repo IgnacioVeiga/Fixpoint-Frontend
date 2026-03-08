@@ -21,11 +21,11 @@ export class AttachmentsService {
   }
 
   isMockMode(): boolean {
-    return environment.useMockFallback;
+    return environment.useMockApi;
   }
 
   listAttachments(ticketId: number): Observable<Attachment[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(this.mockAttachmentsByTicket.get(ticketId) ?? []);
     }
 
@@ -35,7 +35,7 @@ export class AttachmentsService {
   }
 
   getAttachment(id: number): Observable<Attachment> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const attachment = this.findMockAttachmentById(id);
       if (!attachment) {
         return throwError(() => new Error('Adjunto no encontrado'));
@@ -49,7 +49,7 @@ export class AttachmentsService {
   }
 
   uploadAttachment(ticketId: number, file: File, fileType: AttachmentType): Observable<Attachment> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const mockAttachment: Attachment = {
         id: Date.now(),
         ticketId,
@@ -73,7 +73,7 @@ export class AttachmentsService {
   }
 
   deleteAttachment(id: number): Observable<void> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       this.mockAttachmentsByTicket.forEach((attachments, ticketId) => {
         const filtered = attachments.filter((attachment) => attachment.id !== id);
         this.mockAttachmentsByTicket.set(ticketId, filtered);
@@ -91,7 +91,7 @@ export class AttachmentsService {
   }
 
   downloadAttachment(id: number): Observable<Blob> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return throwError(() => new Error('La descarga no está disponible en modo mock.'));
     }
 

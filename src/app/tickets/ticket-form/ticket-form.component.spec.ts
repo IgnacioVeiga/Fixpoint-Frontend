@@ -11,6 +11,7 @@ import { LocaleDateService } from '../../service/locale-date.service';
 import { TicketLogsService } from '../../service/ticket-logs.service';
 import { TicketPartsService } from '../../service/ticket-parts.service';
 import { TicketsService } from '../../service/tickets.service';
+import { AttachmentsService } from '../../service/attachments.service';
 import { TicketFormComponent } from './ticket-form.component';
 
 describe('TicketFormComponent', () => {
@@ -19,7 +20,7 @@ describe('TicketFormComponent', () => {
   let inventoryServiceSpy: jasmine.SpyObj<InventoryService>;
   let ticketLogsServiceSpy: jasmine.SpyObj<TicketLogsService>;
   let ticketPartsServiceSpy: jasmine.SpyObj<TicketPartsService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let attachmentsServiceSpy: jasmine.SpyObj<AttachmentsService>;
 
   const client: Client = {
     id: 1,
@@ -78,7 +79,10 @@ describe('TicketFormComponent', () => {
     inventoryServiceSpy = jasmine.createSpyObj<InventoryService>('InventoryService', ['listInventory']);
     ticketLogsServiceSpy = jasmine.createSpyObj<TicketLogsService>('TicketLogsService', ['listTicketLogs', 'createTicketLog']);
     ticketPartsServiceSpy = jasmine.createSpyObj<TicketPartsService>('TicketPartsService', ['listTicketParts', 'createTicketPart']);
-    routerSpy = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    attachmentsServiceSpy = jasmine.createSpyObj<AttachmentsService>(
+      'AttachmentsService',
+      ['listAttachments', 'uploadAttachment', 'deleteAttachment', 'downloadAttachment', 'isMockMode']
+    );
 
     clientServiceSpy.listClients.and.returnValue(of([client]));
     inventoryServiceSpy.listInventory.and.returnValue(of([inventoryItem]));
@@ -88,6 +92,8 @@ describe('TicketFormComponent', () => {
     ticketServiceSpy.getTicket.and.returnValue(of(createdTicket));
     ticketServiceSpy.createTicket.and.returnValue(of(createdTicket));
     ticketServiceSpy.updateTicket.and.returnValue(of(createdTicket));
+    attachmentsServiceSpy.listAttachments.and.returnValue(of([]));
+    attachmentsServiceSpy.isMockMode.and.returnValue(true);
     ticketLogsServiceSpy.createTicketLog.and.returnValue(of({
       id: 200,
       ticketId: Number(routeParams['id'] ?? 0),
@@ -109,12 +115,12 @@ describe('TicketFormComponent', () => {
         provideZonelessChangeDetection(),
         LocaleDateService,
         { provide: ActivatedRoute, useValue: { snapshot: { params: routeParams } } },
-        { provide: Router, useValue: routerSpy },
         { provide: TicketsService, useValue: ticketServiceSpy },
         { provide: ClientsService, useValue: clientServiceSpy },
         { provide: InventoryService, useValue: inventoryServiceSpy },
         { provide: TicketLogsService, useValue: ticketLogsServiceSpy },
-        { provide: TicketPartsService, useValue: ticketPartsServiceSpy }
+        { provide: TicketPartsService, useValue: ticketPartsServiceSpy },
+        { provide: AttachmentsService, useValue: attachmentsServiceSpy }
       ]
     });
   }
@@ -124,6 +130,8 @@ describe('TicketFormComponent', () => {
     await TestBed.compileComponents();
     const fixture = TestBed.createComponent(TicketFormComponent);
     fixture.detectChanges();
+    const router = TestBed.inject(Router);
+    const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
     const component = fixture.componentInstance;
     expect(ticketServiceSpy.listStatusDefinitions).toHaveBeenCalled();
@@ -144,7 +152,7 @@ describe('TicketFormComponent', () => {
     component.submit();
 
     expect(ticketServiceSpy.createTicket).toHaveBeenCalled();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/tickets', createdTicket.id]);
+    expect(navigateSpy).toHaveBeenCalledWith(['/tickets', createdTicket.id]);
   });
 
   it('should load editing context and add log and part', async () => {

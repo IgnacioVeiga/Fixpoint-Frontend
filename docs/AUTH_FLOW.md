@@ -8,7 +8,7 @@
 
 ## App Initialization
 
-- On app startup, frontend attempts to recover session via `POST /api/auth/refresh`.
+- On app startup, frontend attempts to recover session via `POST /api/v1/auth/refresh`.
 - If refresh succeeds, in-memory session is populated.
 - If refresh fails, user remains unauthenticated and is redirected to `/login` when needed.
 
@@ -19,7 +19,7 @@
   - `username`
   - `password`
   - optional `rememberMe`
-- Frontend calls `POST /api/auth/login`
+- Frontend calls `POST /api/v1/auth/login`
 - Backend returns:
   - access token payload in response body
   - refresh cookie in `Set-Cookie`
@@ -38,7 +38,7 @@
 
 When a protected request returns `401`:
 
-1. Interceptor calls `POST /api/auth/refresh`
+1. Interceptor calls `POST /api/v1/auth/refresh`
 2. If refresh succeeds:
   - access token in memory is replaced
   - original request is retried once
@@ -48,7 +48,7 @@ When a protected request returns `401`:
 
 ## Logout
 
-- Frontend calls `POST /api/auth/logout`
+- Frontend calls `POST /api/v1/auth/logout`
 - Backend revokes refresh session and clears cookie
 - Frontend clears in-memory auth state
 

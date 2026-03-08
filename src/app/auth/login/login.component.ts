@@ -22,7 +22,7 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
 
   readonly usernameMaxLength = APP_USER_USERNAME_MAX_LENGTH;
-  readonly mockMode = environment.useMockFallback;
+  readonly mockMode = environment.useMockApi;
   readonly environmentName = environment.name.toUpperCase();
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);

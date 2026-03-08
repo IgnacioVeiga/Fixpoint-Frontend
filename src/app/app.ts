@@ -23,7 +23,7 @@ export class App {
   private readonly sessionStore = inject(AuthSessionService);
 
   readonly environmentName = environment.name.toUpperCase();
-  readonly mockMode = environment.useMockFallback;
+  readonly mockMode = environment.useMockApi;
   readonly session = this.sessionStore.session;
   readonly isAuthenticated = computed(() => this.sessionStore.isAuthenticated());
   readonly currentUrl = signal(this.router.url);

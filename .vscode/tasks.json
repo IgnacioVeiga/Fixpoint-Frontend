@@ -48,8 +48,29 @@
     },
     {
       "type": "npm",
+      "script": "start:prod",
+      "label": "npm: start:prod",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "typescript",
+        "pattern": "$tsc",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*bundle generation complete.*"
+        }
+      }
+    },
+    {
+      "type": "npm",
       "script": "build",
       "label": "npm: build",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "build:dev",
+      "label": "npm: build:dev",
       "problemMatcher": []
     },
     {
@@ -62,6 +83,12 @@
       "type": "npm",
       "script": "build:mock",
       "label": "npm: build:mock",
+      "problemMatcher": []
+    },
+    {
+      "type": "npm",
+      "script": "build:prod",
+      "label": "npm: build:prod",
       "problemMatcher": []
     },
     {

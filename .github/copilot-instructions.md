@@ -25,7 +25,9 @@ Human onboarding and product documentation are in `docs/`.
   - `/login` uses `guestGuard`.
   - business routes use `authGuard`.
 - Auth bootstrap: `APP_INITIALIZER` in `src/app/app.config.ts` calls `AuthService.initializeSession()`.
-- HTTP abstraction: `src/app/service/api.service.ts`.
+- HTTP abstraction:
+  - `src/app/service/generic-api.service.ts`
+  - `src/app/service/api.service.ts` (facade for backward compatibility)
 - Auth flow implementation:
   - `src/app/service/auth.service.ts`
   - `src/app/service/auth.interceptor.ts`
@@ -68,6 +70,7 @@ Human onboarding and product documentation are in `docs/`.
 - `README.md`
 - `docs/PROJECT_MAP.md`
 - `docs/ENVIRONMENTS.md`
+- `docs/API_CONTRACT.md`
 - `docs/AUTH_FLOW.md`
 - `src/app/app.config.ts`
 - `src/app/app.routes.ts`

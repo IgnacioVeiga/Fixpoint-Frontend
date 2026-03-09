@@ -23,6 +23,13 @@
       "url": "http://localhost:4200/"
     },
     {
+      "name": "Frontend: Prod",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "npm: start:prod",
+      "url": "http://localhost:4200/"
+    },
+    {
       "name": "Frontend: Unit Tests",
       "type": "chrome",
       "request": "launch",

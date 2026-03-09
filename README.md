@@ -15,10 +15,20 @@ npm install
 npm run start:dev
 ```
 
+Helper scripts:
+
+```bash
+./scripts/run.sh dev local
+./scripts/run.sh qa local
+./scripts/run.sh mock local
+./scripts/run.sh prod local
+```
+
 ## Documentation Index
 
 - `docs/DEVELOPMENT_SETUP.md` - setup and run modes
 - `docs/ENVIRONMENTS.md` - `environment*.ts` strategy and expected values
+- `docs/API_CONTRACT.md` - frontend assumptions for backend payloads/endpoints
 - `docs/AUTH_FLOW.md` - login/refresh/logout behavior in frontend
 - `docs/PROJECT_MAP.md` - where to find key frontend modules
 - `docs/TROUBLESHOOTING.md` - common integration and runtime issues
@@ -40,10 +50,13 @@ npm run start:dev
 npm run start:dev
 npm run start:qa
 npm run start:mock
+npm run start:prod
 
 npm run build
+npm run build:dev
 npm run build:qa
 npm run build:mock
+npm run build:prod
 
 npm run test
 npm run test:ci

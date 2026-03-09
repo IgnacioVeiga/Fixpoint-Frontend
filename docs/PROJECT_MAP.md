@@ -44,7 +44,9 @@ Quick navigation guide for contributors returning after a long break.
 
 ## API and Environment Configuration
 
-- API base URL abstraction:
+- API abstraction (envelope + raw payload support):
+  - `src/app/service/generic-api.service.ts`
+- Backward-compatible facade used by existing feature services:
   - `src/app/service/api.service.ts`
 - Compile-time environment files:
   - `src/environments/environment.ts`

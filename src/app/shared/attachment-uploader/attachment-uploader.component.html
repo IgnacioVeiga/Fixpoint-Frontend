@@ -15,7 +15,7 @@
       class="file-input"
     />
     <div class="upload-message">
-      <span class="upload-icon">📤</span>
+      <lucide-icon class="upload-icon" [img]="uploadIcon" [size]="30" aria-hidden="true"></lucide-icon>
       <p>
         Arrastrá archivos o
         <button class="browse-btn" type="button" (click)="fileInput.click()">seleccionalos</button>
@@ -44,7 +44,7 @@
         @for (draft of pendingUploads(); track draft.id) {
           <article class="pending-item">
             <div class="pending-item-main">
-              <span class="attachment-icon">{{ getFileTypeIcon(draft.fileType) }}</span>
+              <lucide-icon class="attachment-icon" [img]="getFileTypeIcon(draft.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
               <div class="attachment-info">
                 <span class="attachment-name">{{ draft.file.name }}</span>
                 <span class="attachment-meta">
@@ -80,7 +80,7 @@
     <div class="attachments-list">
       @for (attachment of attachments(); track attachment.id) {
         <div class="attachment-item" (click)="previewFile(attachment)">
-          <span class="attachment-icon">{{ getFileTypeIcon(attachment.fileType) }}</span>
+          <lucide-icon class="attachment-icon" [img]="getFileTypeIcon(attachment.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
           <div class="attachment-info">
             <span class="attachment-name">{{ attachment.filename }}</span>
             <div class="attachment-badges">

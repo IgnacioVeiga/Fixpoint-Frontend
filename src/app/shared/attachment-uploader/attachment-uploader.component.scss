@@ -24,7 +24,7 @@
 }
 
 .upload-icon {
-    font-size: 2rem;
+    color: var(--primary-strong);
 }
 
 .upload-message p {
@@ -102,7 +102,8 @@
 }
 
 .attachment-icon {
-    font-size: 1.2rem;
+    color: var(--primary-strong);
+    flex-shrink: 0;
 }
 
 .attachment-info {

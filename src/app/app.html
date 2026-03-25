@@ -28,12 +28,15 @@
     <a
       [routerLink]="link.route"
       class="nav-link"
+      #navState="routerLinkActive"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: !!link.exact }"
-      [attr.aria-keyshortcuts]="link.shortcut"
-      [title]="link.shortcut">
+      [attr.aria-keyshortcuts]="navState.isActive ? null : link.shortcut"
+      [title]="navState.isActive ? null : link.shortcut">
       <span class="btn-label">{{ link.label }}</span>
-      <span class="btn-shortcut" aria-hidden="true">{{ link.shortcut }}</span>
+      @if (!navState.isActive) {
+        <span class="btn-shortcut" aria-hidden="true">{{ link.shortcut }}</span>
+      }
     </a>
   }
   <a [routerLink]="'/tickets/nuevo'" class="quick-link" aria-keyshortcuts="Alt+T" title="Alt+T">

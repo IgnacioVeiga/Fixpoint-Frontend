@@ -21,8 +21,10 @@ import {
   getAttachmentTypeIcon,
   getAttachmentTypeLabel
 } from '../../models/attachment.model';
+import { LucideAngularModule, type LucideIconData } from 'lucide-angular';
 import { AttachmentsService } from '../../service/attachments.service';
 import { LocaleDateService } from '../../service/locale-date.service';
+import { UI_ICONS } from '../ui-icons';
 
 @Component({
   selector: 'app-attachment-uploader',
@@ -30,7 +32,7 @@ import { LocaleDateService } from '../../service/locale-date.service';
   styleUrls: ['./attachment-uploader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, LucideAngularModule]
 })
 export class AttachmentUploaderComponent implements OnChanges {
   @Input() ticketId?: number;
@@ -42,6 +44,7 @@ export class AttachmentUploaderComponent implements OnChanges {
   readonly pendingUploads = signal<AttachmentUploadDraft[]>([]);
   readonly uploading = signal(false);
   readonly dragOver = signal(false);
+  readonly uploadIcon = UI_ICONS.upload;
 
   constructor(
     private readonly attachmentService: AttachmentsService,
@@ -72,7 +75,7 @@ export class AttachmentUploaderComponent implements OnChanges {
       .join(' · ');
   }
 
-  getFileTypeIcon(type: AttachmentType): string {
+  getFileTypeIcon(type: AttachmentType): LucideIconData {
     return getAttachmentTypeIcon(type);
   }
 

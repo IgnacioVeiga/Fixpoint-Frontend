@@ -73,7 +73,7 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
         ]
     },
     {
-        name: 'Respaldos',
+        name: 'Backups',
         path: '/archive',
         files: [
             attachment(8, 25, 'backup-ticket-router.zip', '/archive/backup-ticket-router.zip', 'archive', 'zip', '2026-03-07T08:10:00Z', 'Backup')

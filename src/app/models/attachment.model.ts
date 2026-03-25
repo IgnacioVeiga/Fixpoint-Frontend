@@ -1,3 +1,12 @@
+import {
+    Archive,
+    FileText,
+    type LucideIconData,
+    Image as ImageIcon,
+    Paperclip,
+    Sheet as SheetIcon
+} from 'lucide-angular';
+
 export type AttachmentType = 'image' | 'document' | 'spreadsheet' | 'archive' | 'other';
 
 export interface Attachment {
@@ -21,7 +30,7 @@ export interface AttachmentUploadDraft {
 }
 
 type AttachmentTypeDefinition = {
-    icon: string;
+    icon: LucideIconData;
     label: string;
     folderLabel: string;
     accept: string[];
@@ -30,35 +39,35 @@ type AttachmentTypeDefinition = {
 
 export const ATTACHMENT_TYPE_DEFINITIONS: Record<AttachmentType, AttachmentTypeDefinition> = {
     image: {
-        icon: '🖼️',
+        icon: ImageIcon,
         label: 'Imagen',
         folderLabel: 'Imagenes',
         accept: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.tif', '.tiff', '.svg'],
         tagSuggestions: ['Foto', 'Escaneo', 'Esquema', 'Instrucciones']
     },
     document: {
-        icon: '📄',
+        icon: FileText,
         label: 'Documento',
         folderLabel: 'Documentos',
         accept: ['.pdf', '.doc', '.docx', '.odt', '.rtf', '.txt'],
         tagSuggestions: ['Diagnostico', 'Presupuesto', 'Contrato', 'Factura', 'Manual']
     },
     spreadsheet: {
-        icon: '📊',
+        icon: SheetIcon,
         label: 'Planilla',
         folderLabel: 'Planillas',
         accept: ['.xls', '.xlsx', '.csv', '.ods'],
         tagSuggestions: ['Stock', 'Costos', 'Seguimiento']
     },
     archive: {
-        icon: '🗜️',
-        label: 'Comprimido',
-        folderLabel: 'Respaldos',
+        icon: Archive,
+        label: 'Archive',
+        folderLabel: 'Backups',
         accept: ['.zip', '.rar', '.7z'],
         tagSuggestions: ['Backup', 'Entrega', 'Adjuntos']
     },
     other: {
-        icon: '📎',
+        icon: Paperclip,
         label: 'Otro',
         folderLabel: 'Otros',
         accept: [],
@@ -105,7 +114,7 @@ export function getAttachmentFolderLabel(type: AttachmentType): string {
     return ATTACHMENT_TYPE_DEFINITIONS[type]?.folderLabel ?? ATTACHMENT_TYPE_DEFINITIONS.other.folderLabel;
 }
 
-export function getAttachmentTypeIcon(type: AttachmentType): string {
+export function getAttachmentTypeIcon(type: AttachmentType): LucideIconData {
     return ATTACHMENT_TYPE_DEFINITIONS[type]?.icon ?? ATTACHMENT_TYPE_DEFINITIONS.other.icon;
 }
 

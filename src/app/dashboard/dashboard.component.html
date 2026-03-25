@@ -23,123 +23,138 @@
 
     <section class="stats-panel">
         <div class="stats-grid">
-            <div class="stats-card status-chart">
-                <h3>Estado de Tickets</h3>
-                <div class="status-bars">
-                    @for (status of stats().ticketsByStatus | keyvalue; track status.key) {
-                        <div class="status-bar">
-                            <div class="bar-label">{{ getStatusLabel(status.key) }}</div>
-                            <div class="bar-container">
-                                <div class="bar" [style.width.%]="(status.value / statusChartMax()) * 100" [style.background-color]="getStatusColor(status.key)"></div>
-                                <span class="bar-value">{{ status.value }}</span>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="stats-card tickets-chart">
-                <h3>Tickets por Mes</h3>
-                <div class="line-chart">
-                    <div class="chart-bars">
-                        @for (data of stats().ticketsByMonth; track data.month) {
-                            <div class="chart-bar">
-                                <div class="bar" [style.height.%]="getBarHeight(data.count, ticketMonthMax())"></div>
-                                <span class="label">{{ data.month }}</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-card clients-chart">
-                <h3>Crecimiento de Clientes</h3>
-                <div class="line-chart">
-                    <div class="chart-line">
-                        @for (data of stats().clientGrowth; track data.month; let index = $index) {
-                            <div class="point"
-                                 [style.left.%]="getPointLeft(index, stats().clientGrowth.length)"
-                                 [style.bottom.%]="getBarHeight(data.total, clientGrowthMax())">
-                                <span class="tooltip">{{ data.total }}</span>
-                            </div>
-                        }
-                    </div>
-                    <div class="x-axis">
-                        @for (data of stats().clientGrowth; track data.month) {
-                            <span>{{ data.month }}</span>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-card top-clients">
-                <h3>Top Clientes</h3>
-                <div class="client-list">
-                    @for (client of stats().topClients; track client.name) {
-                        <div class="client-item">
-                            <span class="name">{{ client.name }}</span>
-                            <span class="count">{{ client.ticketCount }} tickets</span>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="stats-card storage-card">
-                <div class="storage-head">
-                    <h3>Almacenamiento</h3>
-                    <span class="storage-source">{{ getStorageSourceLabel() }}</span>
-                </div>
-                <div class="storage-summary">
-                    <strong>{{ formatBytes(stats().storage.usedBytes) }}</strong>
-                    @if (hasStorageQuota()) {
-                        <span>de {{ formatBytes(stats().storage.totalBytes) }}</span>
-                    } @else {
-                        <span>registrados</span>
-                    }
-                </div>
-                @if (hasStorageQuota()) {
-                    <div class="storage-progress">
-                        <div class="storage-progress-bar" [style.width.%]="storageProgress()"></div>
-                    </div>
-                }
-                <div class="storage-meta">
-                    <div>
-                        <span>Archivos</span>
-                        <strong>{{ stats().storage.fileCount }}</strong>
-                    </div>
-                    <div>
-                        <span>{{ hasStorageQuota() ? 'Disponible' : 'Capacidad' }}</span>
-                        <strong>
-                            @if (hasStorageQuota()) {
-                                {{ formatBytes(stats().storage.availableBytes) }}
-                            } @else {
-                                Sin cuota
+            @for (row of statsCardRows(); track $index) {
+                <div [class]="getStatsRowClass(row)">
+                    @for (card of row; track card) {
+                        @switch (card) {
+                            @case ('status') {
+                                <div class="stats-card status-chart">
+                                    <h3>Estado de Tickets</h3>
+                                    <div class="status-bars">
+                                        @for (status of stats().ticketsByStatus | keyvalue; track status.key) {
+                                            <div class="status-bar">
+                                                <div class="bar-label">{{ getStatusLabel(status.key) }}</div>
+                                                <div class="bar-container">
+                                                    <div class="bar" [style.width.%]="(status.value / statusChartMax()) * 100" [style.background-color]="getStatusColor(status.key)"></div>
+                                                    <span class="bar-value">{{ status.value }}</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
                             }
-                        </strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-card parts-chart">
-                <h3>Piezas mas usadas</h3>
-                @if (stats().partsUsage.length === 0) {
-                    <p class="empty-state">Sin datos de piezas para este origen.</p>
-                } @else {
-                    <div class="parts-list">
-                        @for (part of stats().partsUsage; track part.name) {
-                            <div class="part-item">
-                                <div class="part-item-head">
-                                    <span>{{ part.name }}</span>
-                                    <strong>{{ part.count }}</strong>
+                            @case ('tickets') {
+                                <div class="stats-card tickets-chart">
+                                    <h3>Tickets por Mes</h3>
+                                    <div class="line-chart">
+                                        <div class="chart-bars">
+                                            @for (data of stats().ticketsByMonth; track data.month) {
+                                                <div class="chart-bar">
+                                                    <div class="bar" [style.height.%]="getBarHeight(data.count, ticketMonthMax())"></div>
+                                                    <span class="label">{{ data.month }}</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="part-bar">
-                                    <div class="part-bar-fill" [style.width.%]="(part.count / partsUsageMax()) * 100"></div>
+                            }
+                            @case ('clients') {
+                                <div class="stats-card clients-chart">
+                                    <h3>Crecimiento de Clientes</h3>
+                                    <div class="line-chart">
+                                        <div class="chart-line">
+                                            @for (data of stats().clientGrowth; track data.month; let index = $index) {
+                                                <div class="point"
+                                                     [style.left.%]="getPointLeft(index, stats().clientGrowth.length)"
+                                                     [style.bottom.%]="getBarHeight(data.total, clientGrowthMax())">
+                                                    <span class="tooltip">{{ data.total }}</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="x-axis">
+                                            @for (data of stats().clientGrowth; track data.month) {
+                                                <span>{{ data.month }}</span>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            }
+                            @case ('topClients') {
+                                <div class="stats-card top-clients">
+                                    <h3>Top Clientes</h3>
+                                    <div class="client-list">
+                                        @for (client of stats().topClients; track client.name) {
+                                            <div class="client-item">
+                                                <span class="name">{{ client.name }}</span>
+                                                <span class="count">{{ client.ticketCount }} tickets</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            @case ('storage') {
+                                <div class="stats-card storage-card">
+                                    <div class="storage-head">
+                                        <h3>Almacenamiento</h3>
+                                        <span class="storage-source">{{ getStorageSourceLabel() }}</span>
+                                    </div>
+                                    <div class="storage-summary">
+                                        <strong>{{ formatBytes(stats().storage.usedBytes) }}</strong>
+                                        @if (hasStorageQuota()) {
+                                            <span>de {{ formatBytes(stats().storage.totalBytes) }}</span>
+                                        } @else {
+                                            <span>registrados</span>
+                                        }
+                                    </div>
+                                    @if (hasStorageQuota()) {
+                                        <div class="storage-progress">
+                                            <div class="storage-progress-bar" [style.width.%]="storageProgress()"></div>
+                                        </div>
+                                    }
+                                    <div class="storage-meta">
+                                        <div>
+                                            <span>Archivos</span>
+                                            <strong>{{ stats().storage.fileCount }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>{{ hasStorageQuota() ? 'Disponible' : 'Capacidad' }}</span>
+                                            <strong>
+                                                @if (hasStorageQuota()) {
+                                                    {{ formatBytes(stats().storage.availableBytes) }}
+                                                } @else {
+                                                    Sin cuota
+                                                }
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @case ('parts') {
+                                <div class="stats-card parts-chart">
+                                    <h3>Piezas mas usadas</h3>
+                                    @if (stats().partsUsage.length === 0) {
+                                        <p class="empty-state">Sin datos de piezas para este origen.</p>
+                                    } @else {
+                                        <div class="parts-list">
+                                            @for (part of stats().partsUsage; track part.name) {
+                                                <div class="part-item">
+                                                    <div class="part-item-head">
+                                                        <span>{{ part.name }}</span>
+                                                        <strong>{{ part.count }}</strong>
+                                                    </div>
+                                                    <div class="part-bar">
+                                                        <div class="part-bar-fill" [style.width.%]="(part.count / partsUsageMax()) * 100"></div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
                         }
-                    </div>
-                }
-            </div>
+                    }
+                </div>
+            }
         </div>
     </section>
 
@@ -177,18 +192,18 @@
                 </div>
 
                 <div class="file-types">
-                    @for (type of fileTypes | keyvalue; track type.key) {
-                        <button [class.active]="selectedFileType() === type.key" (click)="selectedFileType.set($any(type.key))">
-                            <span class="icon">{{ type.value.icon }}</span>
-                            <span class="label">{{ type.value.label }}</span>
+                    @for (type of fileTypeOptions; track type.key) {
+                        <button type="button" [class.active]="selectedFileType() === type.key" (click)="selectedFileType.set(type.key)">
+                            <lucide-icon class="icon" [img]="type.icon" [size]="16" aria-hidden="true"></lucide-icon>
+                            <span class="label">{{ type.label }}</span>
                         </button>
                     }
                 </div>
 
                 <div class="view-toggle">
                     @for (mode of viewModes; track mode.mode) {
-                        <button [class.active]="viewMode() === mode.mode" (click)="viewMode.set(mode.mode)" [title]="mode.label">
-                            {{ mode.icon }}
+                        <button type="button" [class.active]="viewMode() === mode.mode" (click)="viewMode.set(mode.mode)" [attr.aria-label]="mode.label" [title]="mode.label">
+                            <lucide-icon [img]="mode.icon" [size]="16" aria-hidden="true"></lucide-icon>
                         </button>
                     }
                 </div>
@@ -205,7 +220,7 @@
                         <div class="folders-grid">
                             @for (folder of currentFolder().subfolders; track folder.path) {
                                 <div class="folder-item" (click)="navigateTo(folder.path)">
-                                    <span class="folder-icon">📁</span>
+                                    <lucide-icon class="folder-icon" [img]="folderIcon" [size]="20" aria-hidden="true"></lucide-icon>
                                     <span class="folder-name">{{ folder.name }}</span>
                                 </div>
                             }
@@ -221,7 +236,7 @@
                         <div class="files-container" [class]="viewMode()">
                             @for (file of filteredFiles(); track file.id) {
                                 <div class="file-item" (click)="previewFile(file)">
-                                    <div class="file-icon">{{ getFileTypeIcon(file.fileType) }}</div>
+                                    <lucide-icon class="file-icon" [img]="getFileTypeIcon(file.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
                                     <div class="file-info">
                                         <div class="file-name">{{ file.filename }}</div>
                                         <div class="file-badges">

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
 import { firstValueFrom, finalize } from 'rxjs';
 import { RouterModule } from '@angular/router';
+import { LucideAngularModule, type LucideIconData } from 'lucide-angular';
 import {
   Attachment,
   AttachmentType,
@@ -14,6 +15,7 @@ import { MOCK_FILE_STRUCTURE } from '../models/mock-data/dashboard.mock';
 import { AttachmentsService } from '../service/attachments.service';
 import { DashboardService } from '../service/dashboard.service';
 import { LocaleDateService } from '../service/locale-date.service';
+import { UI_ICONS } from '../shared/ui-icons';
 import { isEditableShortcutTarget } from '../shared/keyboard-shortcuts';
 
 interface Breadcrumb {
@@ -23,7 +25,16 @@ interface Breadcrumb {
 
 interface FileViewMode {
   mode: 'grid' | 'list';
-  icon: string;
+  icon: LucideIconData;
+  label: string;
+}
+
+type StatsCardKey = 'status' | 'tickets' | 'clients' | 'topClients' | 'storage' | 'parts';
+type FileTypeFilter = AttachmentType | 'all';
+
+interface FileTypeOption {
+  key: FileTypeFilter;
+  icon: LucideIconData;
   label: string;
 }
 
@@ -33,7 +44,7 @@ interface FileViewMode {
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule, LucideAngularModule]
 })
 export class DashboardComponent {
   private readonly dashboardService = inject(DashboardService);
@@ -45,10 +56,12 @@ export class DashboardComponent {
   readonly source = signal<DashboardSource>('mock');
   readonly sourceMessage = signal<string | null>(null);
   readonly searchQuery = signal('');
-  readonly selectedFileType = signal<AttachmentType | 'all'>('all');
+  readonly selectedFileType = signal<FileTypeFilter>('all');
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly showAllFiles = signal(true);
   readonly currentPath = signal('/');
+  readonly folderIcon = UI_ICONS.folder;
+  readonly statsCards: StatsCardKey[] = ['status', 'tickets', 'clients', 'topClients', 'storage', 'parts'];
 
   readonly fileStructure = computed(() => this.buildFileStructure());
   readonly currentFolder = computed(() => this.findFolder(this.currentPath()) || this.fileStructure());
@@ -56,6 +69,7 @@ export class DashboardComponent {
   readonly ticketMonthMax = computed(() => Math.max(1, ...this.stats().ticketsByMonth.map((item) => item.count)));
   readonly clientGrowthMax = computed(() => Math.max(1, ...this.stats().clientGrowth.map((item) => item.total)));
   readonly partsUsageMax = computed(() => Math.max(1, ...this.stats().partsUsage.map((item) => item.count)));
+  readonly statsCardRows = computed(() => this.buildStatsCardRows(this.statsCards, 4));
   readonly storageProgress = computed(() => {
     const usagePercent = this.stats().storage.usagePercent;
     if (usagePercent === null) {
@@ -66,18 +80,18 @@ export class DashboardComponent {
   });
 
   readonly viewModes: FileViewMode[] = [
-    { mode: 'grid', icon: '◫', label: 'Cuadrícula' },
-    { mode: 'list', icon: '≡', label: 'Lista' }
+    { mode: 'grid', icon: UI_ICONS.grid, label: 'Grid' },
+    { mode: 'list', icon: UI_ICONS.list, label: 'List' }
   ];
 
-  readonly fileTypes = {
-    all: { icon: '🗂️', label: 'Todos' },
-    image: { icon: '🖼️', label: 'Imagenes' },
-    document: { icon: '📄', label: 'Documentos' },
-    spreadsheet: { icon: '📊', label: 'Planillas' },
-    archive: { icon: '🗜️', label: 'Respaldos' },
-    other: { icon: '📎', label: 'Otros' }
-  };
+  readonly fileTypeOptions: FileTypeOption[] = [
+    { key: 'all', icon: UI_ICONS.folders, label: 'Todos' },
+    { key: 'image', icon: getAttachmentTypeIcon('image'), label: getAttachmentFolderLabel('image') },
+    { key: 'document', icon: getAttachmentTypeIcon('document'), label: getAttachmentFolderLabel('document') },
+    { key: 'spreadsheet', icon: getAttachmentTypeIcon('spreadsheet'), label: getAttachmentFolderLabel('spreadsheet') },
+    { key: 'archive', icon: getAttachmentTypeIcon('archive'), label: getAttachmentFolderLabel('archive') },
+    { key: 'other', icon: getAttachmentTypeIcon('other'), label: getAttachmentFolderLabel('other') }
+  ];
 
   readonly filteredFiles = computed(() => {
     let files = this.showAllFiles() ? this.stats().recentFiles : this.currentFolder().files;
@@ -147,12 +161,16 @@ export class DashboardComponent {
     return labels[status] ?? status;
   }
 
-  getFileTypeIcon(type: AttachmentType): string {
+  getFileTypeIcon(type: AttachmentType): LucideIconData {
     return getAttachmentTypeIcon(type);
   }
 
   getFileTypeLabel(type: AttachmentType): string {
     return getAttachmentTypeLabel(type);
+  }
+
+  getStatsRowClass(row: StatsCardKey[]): string {
+    return `stats-row stats-row-count-${row.length}`;
   }
 
   getBarHeight(value: number, max: number): number {
@@ -216,10 +234,6 @@ export class DashboardComponent {
     if (this.showAllFiles()) {
       this.currentPath.set('/');
     }
-  }
-
-  toggleViewMode(): void {
-    this.viewMode.update((current) => (current === 'grid' ? 'list' : 'grid'));
   }
 
   async previewFile(file: Attachment): Promise<void> {
@@ -373,6 +387,21 @@ export class DashboardComponent {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  private buildStatsCardRows(cards: StatsCardKey[], maxPerRow: number): StatsCardKey[][] {
+    if (cards.length <= maxPerRow) {
+      return [cards];
+    }
+
+    const firstRowSize = cards.length % maxPerRow || maxPerRow;
+    const rows: StatsCardKey[][] = [cards.slice(0, firstRowSize)];
+
+    for (let index = firstRowSize; index < cards.length; index += maxPerRow) {
+      rows.push(cards.slice(index, index + maxPerRow));
+    }
+
+    return rows;
   }
 
   private readonly sortByDateDesc = (left: Attachment, right: Attachment) =>

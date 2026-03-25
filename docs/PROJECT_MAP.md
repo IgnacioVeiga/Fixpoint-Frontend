@@ -27,6 +27,8 @@ Quick navigation guide for contributors returning after a long break.
 
 - Dashboard:
   - `src/app/dashboard/*`
+  - `src/app/service/dashboard.service.ts`
+  - `src/app/models/dashboard.model.ts`
 - Tickets:
   - `src/app/tickets/*`
   - `src/app/service/tickets.service.ts`
@@ -39,6 +41,7 @@ Quick navigation guide for contributors returning after a long break.
   - `src/app/inventory/*`
   - `src/app/service/inventory.service.ts`
 - Attachments:
+  - `src/app/models/attachment.model.ts`
   - `src/app/shared/attachment-uploader/*`
   - `src/app/service/attachments.service.ts`
 

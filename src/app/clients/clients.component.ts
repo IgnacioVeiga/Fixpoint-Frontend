@@ -1,8 +1,9 @@
-import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ClientsService } from '../service/clients.service';
 import { Client } from '../models/client.model';
+import { isEditableShortcutTarget } from '../shared/keyboard-shortcuts';
 
 @Component({
     selector: 'app-clients',
@@ -12,7 +13,8 @@ import { Client } from '../models/client.model';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ClientsComponent {
-    private clientService = inject(ClientsService);
+    private readonly clientService = inject(ClientsService);
+    private readonly router = inject(Router);
     clients = signal<Client[]>([]);
     loading = signal(true);
     loadError = signal<string | null>(null);
@@ -32,6 +34,17 @@ export class ClientsComponent {
 
     constructor() {
         this.loadClients();
+    }
+
+    @HostListener('window:keydown.alt.n', ['$event'])
+    onCreateShortcut(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (isEditableShortcutTarget(keyboardEvent.target)) {
+            return;
+        }
+
+        keyboardEvent.preventDefault();
+        void this.router.navigate(['/clientes/nuevo']);
     }
 
     retryLoad(): void {

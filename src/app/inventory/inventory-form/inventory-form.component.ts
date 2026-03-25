@@ -1,8 +1,8 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryService } from '../../service/inventory.service';
-import { InventoryItem } from '../../models/inventory.model';
+import { EnterMovesFocusDirective } from '../../shared/enter-moves-focus.directive';
 
 @Component({
     selector: 'app-inventory-form',
@@ -10,25 +10,26 @@ import { InventoryItem } from '../../models/inventory.model';
     styleUrls: ['./inventory-form.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, RouterModule]
+    imports: [ReactiveFormsModule, RouterModule, EnterMovesFocusDirective]
 })
 export class InventoryFormComponent {
-    private inventory = inject(InventoryService);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
+    private readonly inventory = inject(InventoryService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
 
-    isEditing = signal(false);
-    editingId = signal<number | null>(null);
-
-    conditions = [
+    readonly isEditing = signal(false);
+    readonly editingId = signal<number | null>(null);
+    readonly conditions = [
         { value: 'new', label: 'Nuevo' },
         { value: 'used', label: 'Usado' },
         { value: 'damaged', label: 'Dañado' }
     ];
+    readonly componentTypeSuggestions = ['Pantalla', 'Fuente', 'Motherboard', 'Cable', 'Conector', 'Bateria'];
+    readonly sourceSuggestions = ['Proveedor', 'Reciclado', 'Donado', 'Retirado de otro equipo'];
+    readonly locationSuggestions = ['Estante A-1', 'Estante B-2', 'Caja mostrador', 'Deposito'];
+    readonly form: FormGroup;
 
-    form: FormGroup;
-
-    constructor(private fb: FormBuilder) {
+    constructor(private readonly fb: FormBuilder) {
         this.form = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(2)]],
             componentType: [''],
@@ -39,33 +40,63 @@ export class InventoryFormComponent {
             location: ['']
         });
 
-        // Check if we're editing an existing item
         const id = this.route.snapshot.params['id'];
         if (id && id !== 'nuevo') {
             this.isEditing.set(true);
             this.editingId.set(Number(id));
-            this.inventory.getInventory(Number(id)).subscribe(item => {
+            this.inventory.getInventory(Number(id)).subscribe((item) => {
                 this.form.patchValue(item);
             });
         }
     }
 
-    submit() {
-        if (this.form.valid) {
-            const formValue = this.form.value;
-            
-            if (this.isEditing()) {
-                const id = this.editingId()!;
-                this.inventory.updateInventory(id, formValue).subscribe(() => {
-                    this.router.navigate(['/inventario']);
-                });
-            } else {
-                this.inventory.createInventory(formValue).subscribe(() => {
-                    this.router.navigate(['/inventario']);
-                });
-            }
-        } else {
-            this.form.markAllAsTouched();
+    @HostListener('window:keydown.control.s', ['$event'])
+    @HostListener('window:keydown.meta.s', ['$event'])
+    onKeyboardSave(event: Event): void {
+        event.preventDefault();
+        this.submit();
+    }
+
+    @HostListener('window:keydown.escape', ['$event'])
+    onCancelShortcut(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (keyboardEvent.defaultPrevented || keyboardEvent.altKey || keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.shiftKey) {
+            return;
         }
+
+        keyboardEvent.preventDefault();
+        this.cancel();
+    }
+
+    cancel(): void {
+        if (this.form.dirty && !confirm('Hay cambios sin guardar. ¿Querés cancelar igualmente?')) {
+            return;
+        }
+
+        void this.router.navigate(['/inventario']);
+    }
+
+    submit(): void {
+        if (!this.form.valid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        const formValue = this.form.getRawValue();
+        if (this.isEditing()) {
+            const id = this.editingId();
+            if (!id) {
+                return;
+            }
+
+            this.inventory.updateInventory(id, formValue).subscribe(() => {
+                void this.router.navigate(['/inventario']);
+            });
+            return;
+        }
+
+        this.inventory.createInventory(formValue).subscribe(() => {
+            void this.router.navigate(['/inventario']);
+        });
     }
 }

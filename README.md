@@ -7,6 +7,9 @@ Angular client for workshop operations. It supports real backend environments an
 - Environments: `dev`, `qa`, `prod`, `mock`
 - Routing + guards for protected pages
 - Auth integration with backend refresh-cookie model
+- Dashboard with real backend summary plus local fallback
+- Responsive forms optimized for desktop, touchpad and touch input
+- Attachment flow with explicit file format and optional content tag
 
 ## Quick Start
 

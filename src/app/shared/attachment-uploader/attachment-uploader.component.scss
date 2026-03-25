@@ -12,7 +12,7 @@
 }
 
 .upload-zone {
-    min-height: 110px;
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,7 +32,9 @@
 }
 
 .upload-info,
-.size-info {
+.size-info,
+.queue-head p,
+.attachment-meta {
     color: var(--text-muted);
     font-size: 0.87rem;
 }
@@ -47,56 +49,56 @@
     padding: 0;
 }
 
-.file-type {
-    display: inline-flex;
-    border-radius: 999px;
-    background: var(--primary-soft);
-    padding: 0.12rem 0.42rem;
-    margin: 0.15rem;
-    font-size: 0.78rem;
+.upload-queue {
+    margin-top: 0.85rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.85rem;
 }
 
-.upload-progress {
-    margin-top: 0.7rem;
+.queue-head {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    border-radius: 8px;
-    background: var(--primary-soft);
-    color: var(--primary-strong);
-    padding: 0.55rem;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
 }
 
-.spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.queue-head h3 {
+    margin: 0 0 0.2rem;
+    font-size: 0.98rem;
 }
 
-.attachments-list {
-    margin-top: 0.7rem;
+.queue-actions {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
 }
 
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.pending-list,
+.attachments-list {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.pending-item,
+.attachment-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 0.7rem;
+}
+
+.pending-item-main,
 .attachment-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    padding: 0.58rem 0.7rem;
-    cursor: pointer;
-}
-
-.attachment-item:hover {
-    background: var(--table-row-hover);
 }
 
 .attachment-icon {
@@ -116,9 +118,49 @@
     text-overflow: ellipsis;
 }
 
-.attachment-meta {
-    font-size: 0.8rem;
+.attachment-badges,
+.tag-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.attachment-badge,
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.74rem;
+}
+
+.attachment-badge {
+    background: var(--surface-soft);
     color: var(--text-muted);
+}
+
+.attachment-badge-tag {
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+}
+
+.pending-tag {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+.tag-chip {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.tag-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary-strong);
 }
 
 .empty-files {
@@ -127,15 +169,37 @@
     color: var(--text-muted);
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+@media (hover: hover) and (pointer: fine) {
+    .attachment-item:hover,
+    .pending-item:hover {
+        background: var(--table-row-hover);
+    }
+}
+
+@media (pointer: coarse) {
+    .browse-btn,
+    .tag-chip,
+    .delete-btn,
+    .btn {
+        min-height: 44px;
     }
 }
 
 @media (max-width: 700px) {
+    .queue-head,
+    .queue-actions,
+    .pending-item-main,
     .attachment-item {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .queue-actions {
+        width: 100%;
+    }
+
+    .queue-actions .btn {
+        width: 100%;
     }
 
     .attachment-info {

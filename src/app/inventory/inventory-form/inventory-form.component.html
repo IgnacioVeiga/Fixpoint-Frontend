@@ -1,59 +1,114 @@
-@if (isEditing()) {
-  <section class="page-head">
-    <div>
+<section class="page-head">
+  <div>
+    @if (isEditing()) {
       <h1>Editar Componente</h1>
-      <p class="page-subtitle">Actualizá stock y ubicación física.</p>
-    </div>
-  </section>
-} @else {
-  <section class="page-head">
-    <div>
+      <p class="page-subtitle">Stock, estado y origen en una vista más cómoda para escritorio.</p>
+    } @else {
       <h1>Alta de Componente</h1>
-      <p class="page-subtitle">Registrá un repuesto para usar en tickets.</p>
+      <p class="page-subtitle">Registrá un repuesto listo para tickets y búsquedas futuras.</p>
+    }
+  </div>
+</section>
+
+<form class="entity-form form-shell form-shell-desktop form-shell-desktop-2" appEnterMovesFocus [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <section class="form-section-block">
+    <div class="form-section-head">
+      <h2>Identificación</h2>
+    </div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-field">
+        <label class="label-required">Nombre</label>
+        <input formControlName="name" required autocomplete="off" enterkeyhint="next" placeholder="Ej: Fuente universal 19V" />
+        @if (form.get('name')?.touched && form.get('name')?.invalid) {
+          <span class="error">Ingresá al menos 2 caracteres</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Tipo</label>
+        <input formControlName="componentType" list="inventory-component-types" enterkeyhint="next" placeholder="Ej: Fuente, Pantalla, Conector" />
+        <datalist id="inventory-component-types">
+          @for (option of componentTypeSuggestions; track option) {
+            <option [value]="option"></option>
+          }
+        </datalist>
+      </div>
+
+      <div class="form-field form-field-full">
+        <label>Descripción</label>
+        <textarea formControlName="description" placeholder="Compatibilidades, medidas o detalles del componente"></textarea>
+      </div>
     </div>
   </section>
-}
-<form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <div>
-    <label class="label-required">Nombre</label>
-    <input formControlName="name" required />
-    @if (form.get('name')?.touched && form.get('name')?.invalid) {
-      <span class="error">Nombre requerido (mínimo 2 letras)</span>
-    }
+
+  <section class="form-section-block">
+    <div class="form-section-head">
+      <h2>Stock y estado</h2>
+    </div>
+
+    <div class="form-grid form-grid-3">
+      <div class="form-field">
+        <label class="label-required">Condición</label>
+        <select formControlName="condition" required>
+          @for (c of conditions; track c.value) {
+            <option [value]="c.value">{{ c.label }}</option>
+          }
+        </select>
+        @if (form.get('condition')?.touched && form.get('condition')?.invalid) {
+          <span class="error">Condición requerida</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="label-required">Cantidad</label>
+        <input type="number" formControlName="quantity" min="1" inputmode="numeric" required />
+        @if (form.get('quantity')?.touched && form.get('quantity')?.invalid) {
+          <span class="error">Mínimo 1 unidad</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Ubicación</label>
+        <input formControlName="location" list="inventory-locations" enterkeyhint="next" placeholder="Ej: Estante A-1" />
+        <datalist id="inventory-locations">
+          @for (option of locationSuggestions; track option) {
+            <option [value]="option"></option>
+          }
+        </datalist>
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section-block form-section-full-width">
+    <div class="form-section-head">
+      <h2>Origen</h2>
+    </div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-field form-field-full">
+        <label>Fuente</label>
+        <input formControlName="source" list="inventory-sources" enterkeyhint="next" placeholder="Ej: Proveedor o equipo donante" />
+        <datalist id="inventory-sources">
+          @for (option of sourceSuggestions; track option) {
+            <option [value]="option"></option>
+          }
+        </datalist>
+      </div>
+    </div>
+  </section>
+
+  <div class="form-actions">
+    <span class="form-actions-note">Enter avanza entre campos.</span>
+    <div class="form-actions-group">
+      <button class="btn btn-secondary" type="button" (click)="cancel()" aria-keyshortcuts="Esc" title="Esc">
+        <span class="btn-label">Cancelar</span>
+        <span class="btn-shortcut" aria-hidden="true">Esc</span>
+      </button>
+      <button class="btn" type="submit" [disabled]="form.invalid" aria-keyshortcuts="Control+S Meta+S" title="Ctrl/Cmd + S">
+        <span class="btn-label">Guardar componente</span>
+        <span class="btn-shortcut" aria-hidden="true">Ctrl/Cmd+S</span>
+      </button>
+    </div>
   </div>
-  <div>
-    <label>Tipo</label>
-    <input formControlName="componentType" />
-  </div>
-  <div>
-    <label>Descripción</label>
-    <input formControlName="description" />
-  </div>
-  <div>
-    <label class="label-required">Condición</label>
-    <select formControlName="condition" required>
-      @for (c of conditions; track c.value) {
-        <option [value]="c.value">{{ c.label }}</option>
-      }
-    </select>
-    @if (form.get('condition')?.touched && form.get('condition')?.invalid) {
-      <span class="error">Condición requerida</span>
-    }
-  </div>
-  <div>
-    <label>Fuente</label>
-    <input formControlName="source" />
-  </div>
-  <div>
-    <label class="label-required">Cantidad</label>
-    <input type="number" formControlName="quantity" min="1" required />
-    @if (form.get('quantity')?.touched && form.get('quantity')?.invalid) {
-      <span class="error">Cantidad mínima: 1</span>
-    }
-  </div>
-  <div>
-    <label>Ubicación</label>
-    <input formControlName="location" />
-  </div>
-  <button class="btn" type="submit" [disabled]="form.invalid">Guardar componente</button>
 </form>

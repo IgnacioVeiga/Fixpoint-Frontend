@@ -1,8 +1,9 @@
-import { Component, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { InventoryService } from '../service/inventory.service';
 import { InventoryItem } from '../models/inventory.model';
+import { isEditableShortcutTarget } from '../shared/keyboard-shortcuts';
 
 @Component({
     selector: 'app-inventory',
@@ -12,7 +13,8 @@ import { InventoryItem } from '../models/inventory.model';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryComponent {
-    private inventory = inject(InventoryService);
+    private readonly inventory = inject(InventoryService);
+    private readonly router = inject(Router);
     items = signal<InventoryItem[]>([]);
     loading = signal(true);
     loadError = signal<string | null>(null);
@@ -49,6 +51,17 @@ export class InventoryComponent {
 
     constructor() {
         this.loadInventory();
+    }
+
+    @HostListener('window:keydown.alt.n', ['$event'])
+    onCreateShortcut(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (isEditableShortcutTarget(keyboardEvent.target)) {
+            return;
+        }
+
+        keyboardEvent.preventDefault();
+        void this.router.navigate(['/inventario/nuevo']);
     }
 
     retryLoad(): void {

@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { App } from './app';
 import { AuthSessionService } from './service/auth-session.service';
 
@@ -43,6 +43,27 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('.main-nav')).toBeTruthy();
+  });
+
+  it('should navigate with Alt+2 when session is active', () => {
+    const fixture = TestBed.createComponent(App);
+    const sessionStore = TestBed.inject(AuthSessionService);
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigate').and.resolveTo(true);
+
+    sessionStore.setSession({
+      tokenType: 'Bearer',
+      accessToken: 'token-123',
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      username: 'tech-user',
+      role: 'TECH'
+    });
+
+    fixture.detectChanges();
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, key: '2' }));
+
+    expect(router.navigate).toHaveBeenCalledWith(['/tickets']);
   });
 
   it('should toggle and apply theme to document root', () => {

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { Attachment, AttachmentType } from '../models/attachment.model';
+import { Attachment, detectAttachmentMetadata } from '../models/attachment.model';
 import { MOCK_RECENT_FILES } from '../models/mock-data/dashboard.mock';
 import { environment } from '../../environments/environment';
 
@@ -26,11 +26,25 @@ export class AttachmentsService {
 
   listAttachments(ticketId: number): Observable<Attachment[]> {
     if (environment.useMockApi) {
-      return of(this.mockAttachmentsByTicket.get(ticketId) ?? []);
+      return of([...(this.mockAttachmentsByTicket.get(ticketId) ?? [])]);
     }
 
     return this.api.get<Attachment[]>(`attachments/ticket/${ticketId}`).pipe(
       catchError((error) => this.handleError(error, `Error al listar adjuntos del ticket ${ticketId}`))
+    );
+  }
+
+  listRecentAttachments(limit = 12): Observable<Attachment[]> {
+    if (environment.useMockApi) {
+      return of(
+        this.collectMockAttachments()
+          .sort((left, right) => new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime())
+          .slice(0, limit)
+      );
+    }
+
+    return this.api.get<Attachment[]>(`attachments/recent`, { limit }).pipe(
+      catchError((error) => this.handleError(error, 'Error al listar adjuntos recientes'))
     );
   }
 
@@ -48,14 +62,24 @@ export class AttachmentsService {
     );
   }
 
-  uploadAttachment(ticketId: number, file: File, fileType: AttachmentType): Observable<Attachment> {
+  uploadAttachment(ticketId: number, file: File, tag?: string): Observable<Attachment> {
+    const metadata = detectAttachmentMetadata(file.name);
+    if (!metadata) {
+      return throwError(() => new Error(`Formato de archivo no soportado: ${file.name}`));
+    }
+
+    const normalizedTag = tag?.trim() || undefined;
+
     if (environment.useMockApi) {
       const mockAttachment: Attachment = {
         id: Date.now(),
         ticketId,
         filename: file.name,
         filepath: `/mock/${file.name}`,
-        fileType,
+        fileType: metadata.fileType,
+        fileFormat: metadata.fileFormat,
+        fileSizeBytes: file.size,
+        tag: normalizedTag,
         uploadedAt: new Date().toISOString()
       };
       const ticketAttachments = this.mockAttachmentsByTicket.get(ticketId) ?? [];
@@ -65,7 +89,9 @@ export class AttachmentsService {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('fileType', fileType);
+    if (normalizedTag) {
+      formData.append('tag', normalizedTag);
+    }
 
     return this.api.post<Attachment>(`attachments/upload/ticket/${ticketId}`, formData).pipe(
       catchError((error) => this.handleError(error, `Error al subir adjunto al ticket ${ticketId}`))
@@ -101,6 +127,12 @@ export class AttachmentsService {
         withCredentials: true
       })
       .pipe(catchError((error) => this.handleError(error, `Error al descargar adjunto ${id}`)));
+  }
+
+  private collectMockAttachments(): Attachment[] {
+    return Array.from(this.mockAttachmentsByTicket.values()).flatMap((attachments) =>
+      attachments.map((attachment) => ({ ...attachment }))
+    );
   }
 
   private findMockAttachmentById(id: number): Attachment | undefined {

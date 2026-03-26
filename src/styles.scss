@@ -761,6 +761,105 @@ tbody tr:last-child td {
     gap: 0.2rem;
 }
 
+.dashboard .files-container.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.6rem;
+    align-items: stretch;
+}
+
+.dashboard .files-container.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.dashboard .file-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.72rem;
+    min-height: 224px;
+    height: 100%;
+}
+
+.dashboard .files-container.list .file-item {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 136px;
+}
+
+.dashboard .files-container.list .file-item.file-item-without-preview {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard .file-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.dashboard .file-thumbnail {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-soft);
+    border: 1px solid rgba(19, 122, 127, 0.14);
+}
+
+.dashboard .files-container.list .file-thumbnail {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 100px;
+}
+
+.dashboard .file-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.dashboard .file-name {
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+.dashboard .file-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.dashboard .file-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    padding: 0.15rem 0.45rem;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.dashboard .file-badge-tag {
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+}
+
+.dashboard .file-meta {
+    margin-top: 0.35rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
@@ -798,6 +897,11 @@ a:focus-visible {
     .dashboard .storage-meta {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .dashboard .files-container.list .file-item,
+    .dashboard .files-container.list .file-item.file-item-without-preview {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 

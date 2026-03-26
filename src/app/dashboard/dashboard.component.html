@@ -235,8 +235,12 @@
                     } @else {
                         <div class="files-container" [class]="viewMode()">
                             @for (file of filteredFiles(); track file.id) {
-                                <div class="file-item" (click)="previewFile(file)">
-                                    <lucide-icon class="file-icon" [img]="getFileTypeIcon(file.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
+                                <div class="file-item" [class.file-item-with-preview]="hasReadyThumbnail(file)" [class.file-item-without-preview]="!hasReadyThumbnail(file)" (click)="previewFile(file)">
+                                    @if (getThumbnailUrl(file); as thumbnailUrl) {
+                                        <div class="file-thumbnail">
+                                            <img [src]="thumbnailUrl" [alt]="'Miniatura de ' + file.filename" loading="lazy" />
+                                        </div>
+                                    }
                                     <div class="file-info">
                                         <div class="file-name">{{ file.filename }}</div>
                                         <div class="file-badges">
@@ -249,6 +253,7 @@
                                         <div class="file-meta">
                                             <span class="date">{{ formatDate(file.uploadedAt) }}</span>
                                             <span class="ticket">Ticket #{{ file.ticketId }}</span>
+                                            <span class="size">{{ formatBytes(file.fileSizeBytes) }}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -1,5 +1,6 @@
 import { Attachment } from '../attachment.model';
 import { DashboardStats, FileFolder } from '../dashboard.model';
+import { createMockAttachmentThumbnailDataUrl } from '../../shared/mock-attachment-thumbnail';
 
 const attachment = (
     id: number,
@@ -17,6 +18,7 @@ const attachment = (
     filepath,
     fileType,
     fileFormat,
+    thumbnailUrl: createMockAttachmentThumbnailDataUrl(filename, fileType, fileFormat, tag),
     tag,
     uploadedAt
 });
@@ -26,8 +28,8 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
         name: 'Documentos',
         path: '/document',
         files: [
-            attachment(1, 18, 'presupuesto-smart-tv.pdf', '/document/presupuesto-smart-tv.pdf', 'document', 'pdf', '2026-03-10T10:30:00Z', 'Presupuesto'),
-            attachment(2, 21, 'manual-instalacion-router.docx', '/document/manual-instalacion-router.docx', 'document', 'docx', '2026-03-09T15:30:00Z', 'Manual')
+            attachment(1, 1, 'presupuesto-smart-tv.pdf', '/document/presupuesto-smart-tv.pdf', 'document', 'pdf', '2026-03-10T10:30:00Z', 'Presupuesto'),
+            attachment(2, 2, 'manual-instalacion-router.docx', '/document/manual-instalacion-router.docx', 'document', 'docx', '2026-03-09T15:30:00Z', 'Manual')
         ],
         subfolders: []
     },
@@ -35,14 +37,14 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
         name: 'Planillas',
         path: '/spreadsheet',
         files: [
-            attachment(3, 22, 'stock-repuestos-marzo.csv', '/spreadsheet/stock-repuestos-marzo.csv', 'spreadsheet', 'csv', '2026-03-11T11:00:00Z', 'Stock')
+            attachment(3, 3, 'stock-repuestos-marzo.csv', '/spreadsheet/stock-repuestos-marzo.csv', 'spreadsheet', 'csv', '2026-03-11T11:00:00Z', 'Stock')
         ],
         subfolders: [
             {
                 name: 'Costos',
                 path: '/spreadsheet/costos',
                 files: [
-                    attachment(4, 22, 'costos-servicio-impresoras.xlsx', '/spreadsheet/costos/costos-servicio-impresoras.xlsx', 'spreadsheet', 'xlsx', '2026-03-08T09:30:00Z', 'Costos')
+                    attachment(4, 3, 'costos-servicio-impresoras.xlsx', '/spreadsheet/costos/costos-servicio-impresoras.xlsx', 'spreadsheet', 'xlsx', '2026-03-08T09:30:00Z', 'Costos')
                 ],
                 subfolders: []
             }
@@ -57,8 +59,8 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
                 name: 'Escaneos',
                 path: '/image/escaneos',
                 files: [
-                    attachment(5, 18, 'placa-fuente-scan.png', '/image/escaneos/placa-fuente-scan.png', 'image', 'png', '2026-03-10T10:35:00Z', 'Escaneo'),
-                    attachment(6, 21, 'conector-red-detalle.jpg', '/image/escaneos/conector-red-detalle.jpg', 'image', 'jpg', '2026-03-09T14:20:00Z', 'Foto')
+                    attachment(5, 1, 'placa-fuente-scan.png', '/image/escaneos/placa-fuente-scan.png', 'image', 'png', '2026-03-10T10:35:00Z', 'Escaneo'),
+                    attachment(6, 2, 'conector-red-detalle.jpg', '/image/escaneos/conector-red-detalle.jpg', 'image', 'jpg', '2026-03-09T14:20:00Z', 'Foto')
                 ],
                 subfolders: []
             },
@@ -66,7 +68,7 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
                 name: 'Esquemas',
                 path: '/image/esquemas',
                 files: [
-                    attachment(7, 25, 'diagrama-senal-router.webp', '/image/esquemas/diagrama-senal-router.webp', 'image', 'webp', '2026-03-10T16:45:00Z', 'Esquema')
+                    attachment(7, 3, 'diagrama-senal-router.webp', '/image/esquemas/diagrama-senal-router.webp', 'image', 'webp', '2026-03-10T16:45:00Z', 'Esquema')
                 ],
                 subfolders: []
             }
@@ -76,7 +78,7 @@ export const MOCK_FILE_STRUCTURE: FileFolder[] = [
         name: 'Backups',
         path: '/archive',
         files: [
-            attachment(8, 25, 'backup-ticket-router.zip', '/archive/backup-ticket-router.zip', 'archive', 'zip', '2026-03-07T08:10:00Z', 'Backup')
+            attachment(8, 3, 'backup-ticket-router.zip', '/archive/backup-ticket-router.zip', 'archive', 'zip', '2026-03-07T08:10:00Z', 'Backup')
         ],
         subfolders: []
     }

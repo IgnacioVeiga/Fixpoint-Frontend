@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { firstValueFrom, finalize } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule, type LucideIconData } from 'lucide-angular';
@@ -62,6 +62,8 @@ export class DashboardComponent {
   readonly currentPath = signal('/');
   readonly folderIcon = UI_ICONS.folder;
   readonly statsCards: StatsCardKey[] = ['status', 'tickets', 'clients', 'topClients', 'storage', 'parts'];
+  readonly thumbnailStates = signal<Record<number, 'ready' | 'failed'>>({});
+  private readonly requestedThumbnailIds = new Set<number>();
 
   readonly fileStructure = computed(() => this.buildFileStructure());
   readonly currentFolder = computed(() => this.findFolder(this.currentPath()) || this.fileStructure());
@@ -113,6 +115,11 @@ export class DashboardComponent {
 
   constructor() {
     this.loadDashboard();
+    effect(() => {
+      for (const file of this.filteredFiles()) {
+        this.preloadThumbnail(file);
+      }
+    });
   }
 
   @HostListener('window:keydown.alt.a', ['$event'])
@@ -167,6 +174,18 @@ export class DashboardComponent {
 
   getFileTypeLabel(type: AttachmentType): string {
     return getAttachmentTypeLabel(type);
+  }
+
+  hasReadyThumbnail(file: Attachment): boolean {
+    return this.thumbnailStates()[file.id] === 'ready';
+  }
+
+  getThumbnailUrl(file: Attachment): string | null {
+    if (!this.hasReadyThumbnail(file)) {
+      return null;
+    }
+
+    return this.attachmentsService.getThumbnailUrl(file);
   }
 
   getStatsRowClass(row: StatsCardKey[]): string {
@@ -269,6 +288,8 @@ export class DashboardComponent {
   private loadDashboard(): void {
     this.loading.set(true);
     this.sourceMessage.set(null);
+    this.thumbnailStates.set({});
+    this.requestedThumbnailIds.clear();
 
     this.dashboardService.getSnapshot()
       .pipe(finalize(() => this.loading.set(false)))
@@ -402,6 +423,29 @@ export class DashboardComponent {
     }
 
     return rows;
+  }
+
+  private preloadThumbnail(file: Attachment): void {
+    const state = this.thumbnailStates()[file.id];
+    if (state || this.requestedThumbnailIds.has(file.id)) {
+      return;
+    }
+
+    const thumbnailUrl = this.attachmentsService.getThumbnailUrl(file);
+    if (!thumbnailUrl) {
+      this.thumbnailStates.update((current) => ({ ...current, [file.id]: 'failed' }));
+      return;
+    }
+
+    this.requestedThumbnailIds.add(file.id);
+    const image = new Image();
+    image.onload = () => {
+      this.thumbnailStates.update((current) => ({ ...current, [file.id]: 'ready' }));
+    };
+    image.onerror = () => {
+      this.thumbnailStates.update((current) => ({ ...current, [file.id]: 'failed' }));
+    };
+    image.src = thumbnailUrl;
   }
 
   private readonly sortByDateDesc = (left: Attachment, right: Attachment) =>

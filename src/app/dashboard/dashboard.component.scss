@@ -294,65 +294,6 @@
     color: var(--primary-strong);
 }
 
-.files-container.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0.5rem;
-}
-
-.files-container.list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 0.58rem;
-}
-
-.file-icon {
-    color: var(--primary-strong);
-    flex-shrink: 0;
-}
-
-.file-info {
-    min-width: 0;
-}
-
-.file-name {
-    font-weight: 700;
-}
-
-.file-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin-top: 0.35rem;
-}
-
-.file-badge {
-    display: inline-flex;
-    align-items: center;
-    border-radius: 999px;
-    background: var(--surface-soft);
-    padding: 0.15rem 0.45rem;
-    font-size: 0.74rem;
-    color: var(--text-muted);
-}
-
-.file-badge-tag {
-    background: var(--primary-soft);
-    color: var(--primary-strong);
-}
-
-.file-meta {
-    margin-top: 0.35rem;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
 .empty-state {
     color: var(--text-muted);
     font-size: 0.9rem;
@@ -395,4 +336,5 @@
     .status-bar {
         grid-template-columns: 1fr;
     }
+
 }

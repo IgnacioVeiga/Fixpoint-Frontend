@@ -18,6 +18,7 @@ export interface Attachment {
     fileFormat: string;
     fileSizeBytes?: number | null;
     tag?: string | null;
+    thumbnailUrl?: string | null;
     uploadedAt: string;
 }
 

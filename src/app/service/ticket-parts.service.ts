@@ -4,15 +4,22 @@ import { catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { AddTicketPartRequest, TicketPart } from '../models/ticket-part.model';
 import { environment } from '../../environments/environment';
+import { MOCK_TICKET_PARTS_BY_TICKET } from '../models/mock-data/tickets.mock';
 
 @Injectable({ providedIn: 'root' })
 export class TicketPartsService {
   private readonly api = inject(ApiService);
   private readonly mockPartsByTicket = new Map<number, TicketPart[]>();
 
+  constructor() {
+    Object.entries(MOCK_TICKET_PARTS_BY_TICKET).forEach(([ticketId, parts]) => {
+      this.mockPartsByTicket.set(Number(ticketId), parts.map((part) => ({ ...part })));
+    });
+  }
+
   listTicketParts(ticketId: number): Observable<TicketPart[]> {
     if (environment.useMockApi) {
-      return of(this.mockPartsByTicket.get(ticketId) ?? []);
+      return of((this.mockPartsByTicket.get(ticketId) ?? []).map((part) => ({ ...part })));
     }
 
     return this.api.get<TicketPart[]>(`tickets/${ticketId}/parts`).pipe(

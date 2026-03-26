@@ -35,6 +35,7 @@ Operational contract between `Fixpoint-Frontend` and backend APIs.
 - `GET /attachments/ticket/{ticketId}`
 - `POST /attachments/upload/ticket/{ticketId}`
 - `GET /attachments/download/{id}`
+- `GET /attachments/thumbnail/{id}`
 - `DELETE /attachments/{id}`
 
 Upload assumptions:
@@ -54,6 +55,14 @@ Attachment payload assumptions:
 - `fileSizeBytes`
 - `tag` (optional)
 - `uploadedAt`
+- `thumbnailUrl` is mock-only frontend data. Real environments resolve thumbnails through `GET /attachments/thumbnail/{id}` and cache-bust with the attachment `filepath`.
+
+Thumbnail assumptions:
+
+- Backend returns `image/png` for generated thumbnails.
+- Image files should try to use a reduced preview generated from the original file when possible.
+- Non-image files can still return a generated placeholder thumbnail from the server.
+- If thumbnail generation fails or the file is unavailable, frontend must hide the preview and let text use the full width.
 
 Dashboard summary assumptions:
 

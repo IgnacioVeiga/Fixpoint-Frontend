@@ -6,6 +6,7 @@ import { ApiService } from './api.service';
 import { Attachment, detectAttachmentMetadata } from '../models/attachment.model';
 import { MOCK_RECENT_FILES } from '../models/mock-data/dashboard.mock';
 import { environment } from '../../environments/environment';
+import { createMockAttachmentThumbnailDataUrl } from '../shared/mock-attachment-thumbnail';
 
 @Injectable({ providedIn: 'root' })
 export class AttachmentsService {
@@ -80,6 +81,7 @@ export class AttachmentsService {
         fileFormat: metadata.fileFormat,
         fileSizeBytes: file.size,
         tag: normalizedTag,
+        thumbnailUrl: createMockAttachmentThumbnailDataUrl(file.name, metadata.fileType, metadata.fileFormat, normalizedTag),
         uploadedAt: new Date().toISOString()
       };
       const ticketAttachments = this.mockAttachmentsByTicket.get(ticketId) ?? [];
@@ -114,6 +116,15 @@ export class AttachmentsService {
 
   getDownloadUrl(id: number): string {
     return this.api.resolveUrl(`attachments/download/${id}`);
+  }
+
+  getThumbnailUrl(attachment: Attachment): string | null {
+    if (environment.useMockApi) {
+      return attachment.thumbnailUrl ?? null;
+    }
+
+    const versionToken = encodeURIComponent(attachment.filepath ?? `${attachment.id}`);
+    return this.api.resolveUrl(`attachments/thumbnail/${attachment.id}?v=${versionToken}`);
   }
 
   downloadAttachment(id: number): Observable<Blob> {

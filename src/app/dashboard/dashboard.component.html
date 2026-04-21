@@ -1,86 +1,173 @@
 <div class="dashboard">
-    <!-- Panel de Estadísticas -->
+    <section class="dashboard-head">
+        <div>
+            <h1>Panel operativo</h1>
+            <p class="page-subtitle">Resumen de tickets, clientes y archivos con datos reales cuando estan disponibles.</p>
+        </div>
+        @if (source() !== 'api') {
+            <div class="dashboard-source" [class.dashboard-source-fallback]="source() === 'fallback'" [class.dashboard-source-mock]="source() === 'mock'">
+                @if (source() === 'fallback') {
+                <span>Fallback local</span>
+                } @else {
+                    <span>Modo mock</span>
+                }
+            </div>
+        }
+    </section>
+
+    @if (sourceMessage()) {
+        <div class="inline-alert" [class.inline-alert-error]="source() === 'fallback'">
+            <span>{{ sourceMessage() }}</span>
+        </div>
+    }
+
     <section class="stats-panel">
         <div class="stats-grid">
-            <!-- Estado de Tickets -->
-            <div class="stats-card status-chart">
-                <h3>Estado de Tickets</h3>
-                <div class="status-bars">
-                    @for (status of stats().ticketsByStatus | keyvalue; track status.key) {
-                        <div class="status-bar">
-                            <div class="bar-label">{{ getStatusLabel(status.key) }}</div>
-                            <div class="bar-container">
-                                <div class="bar" 
-                                     [style.width.%]="(status.value / 50) * 100"
-                                     [style.background-color]="getStatusColor(status.key)">
+            @for (row of statsCardRows(); track $index) {
+                <div [class]="getStatsRowClass(row)">
+                    @for (card of row; track card) {
+                        @switch (card) {
+                            @case ('status') {
+                                <div class="stats-card status-chart">
+                                    <h3>Estado de Tickets</h3>
+                                    <div class="status-bars">
+                                        @for (status of stats().ticketsByStatus | keyvalue; track status.key) {
+                                            <div class="status-bar">
+                                                <div class="bar-label">{{ getStatusLabel(status.key) }}</div>
+                                                <div class="bar-container">
+                                                    <div class="bar" [style.width.%]="(status.value / statusChartMax()) * 100" [style.background-color]="getStatusColor(status.key)"></div>
+                                                    <span class="bar-value">{{ status.value }}</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
                                 </div>
-                                <span class="bar-value">{{ status.value }}</span>
-                            </div>
-                        </div>
+                            }
+                            @case ('tickets') {
+                                <div class="stats-card tickets-chart">
+                                    <h3>Tickets por Mes</h3>
+                                    <div class="line-chart">
+                                        <div class="chart-bars">
+                                            @for (data of stats().ticketsByMonth; track data.month) {
+                                                <div class="chart-bar">
+                                                    <div class="bar" [style.height.%]="getBarHeight(data.count, ticketMonthMax())"></div>
+                                                    <span class="label">{{ data.month }}</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @case ('clients') {
+                                <div class="stats-card clients-chart">
+                                    <h3>Crecimiento de Clientes</h3>
+                                    <div class="line-chart">
+                                        <div class="chart-line">
+                                            @for (data of stats().clientGrowth; track data.month; let index = $index) {
+                                                <div class="point"
+                                                     [style.left.%]="getPointLeft(index, stats().clientGrowth.length)"
+                                                     [style.bottom.%]="getBarHeight(data.total, clientGrowthMax())">
+                                                    <span class="tooltip">{{ data.total }}</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="x-axis">
+                                            @for (data of stats().clientGrowth; track data.month) {
+                                                <span>{{ data.month }}</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @case ('topClients') {
+                                <div class="stats-card top-clients">
+                                    <h3>Top Clientes</h3>
+                                    <div class="client-list">
+                                        @for (client of stats().topClients; track client.name) {
+                                            <div class="client-item">
+                                                <span class="name">{{ client.name }}</span>
+                                                <span class="count">{{ client.ticketCount }} tickets</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            @case ('storage') {
+                                <div class="stats-card storage-card">
+                                    <div class="storage-head">
+                                        <h3>Almacenamiento</h3>
+                                        <span class="storage-source">{{ getStorageSourceLabel() }}</span>
+                                    </div>
+                                    <div class="storage-summary">
+                                        <strong>{{ formatBytes(stats().storage.usedBytes) }}</strong>
+                                        @if (hasStorageQuota()) {
+                                            <span>de {{ formatBytes(stats().storage.totalBytes) }}</span>
+                                        } @else {
+                                            <span>registrados</span>
+                                        }
+                                    </div>
+                                    @if (hasStorageQuota()) {
+                                        <div class="storage-progress">
+                                            <div class="storage-progress-bar" [style.width.%]="storageProgress()"></div>
+                                        </div>
+                                    }
+                                    <div class="storage-meta">
+                                        <div>
+                                            <span>Archivos</span>
+                                            <strong>{{ stats().storage.fileCount }}</strong>
+                                        </div>
+                                        <div>
+                                            <span>{{ hasStorageQuota() ? 'Disponible' : 'Capacidad' }}</span>
+                                            <strong>
+                                                @if (hasStorageQuota()) {
+                                                    {{ formatBytes(stats().storage.availableBytes) }}
+                                                } @else {
+                                                    Sin cuota
+                                                }
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @case ('parts') {
+                                <div class="stats-card parts-chart">
+                                    <h3>Piezas mas usadas</h3>
+                                    @if (stats().partsUsage.length === 0) {
+                                        <p class="empty-state">Sin datos de piezas para este origen.</p>
+                                    } @else {
+                                        <div class="parts-list">
+                                            @for (part of stats().partsUsage; track part.name) {
+                                                <div class="part-item">
+                                                    <div class="part-item-head">
+                                                        <span>{{ part.name }}</span>
+                                                        <strong>{{ part.count }}</strong>
+                                                    </div>
+                                                    <div class="part-bar">
+                                                        <div class="part-bar-fill" [style.width.%]="(part.count / partsUsageMax()) * 100"></div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
                     }
                 </div>
-            </div>
-
-            <!-- Tickets por Mes -->
-            <div class="stats-card tickets-chart">
-                <h3>Tickets por Mes</h3>
-                <div class="line-chart">
-                    <div class="chart-bars">
-                        @for (data of stats().ticketsByMonth; track data.month) {
-                            <div class="chart-bar">
-                                <div class="bar" [style.height.%]="(data.count / 50) * 100"></div>
-                                <span class="label">{{ data.month }}</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Crecimiento de Clientes -->
-            <div class="stats-card clients-chart">
-                <h3>Crecimiento de Clientes</h3>
-                <div class="line-chart">
-                    <div class="chart-line">
-                        @for (data of stats().clientGrowth; track data.month) {
-                            <div class="point" [style.bottom.%]="(data.total / 250) * 100">
-                                <span class="tooltip">{{ data.total }}</span>
-                            </div>
-                        }
-                    </div>
-                    <div class="x-axis">
-                        @for (data of stats().clientGrowth; track data.month) {
-                            <span>{{ data.month }}</span>
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Clientes -->
-            <div class="stats-card top-clients">
-                <h3>Top Clientes</h3>
-                <div class="client-list">
-                    @for (client of stats().topClients; track client.name) {
-                        <div class="client-item">
-                            <span class="name">{{ client.name }}</span>
-                            <span class="count">{{ client.ticketCount }} tickets</span>
-                        </div>
-                    }
-                </div>
-            </div>
+            }
         </div>
     </section>
 
-    <!-- Explorador de Archivos -->
     <section class="file-explorer">
         <div class="explorer-header">
             <div class="header-top">
                 <h2>Archivos</h2>
-                <button class="toggle-view-btn" (click)="toggleAllFiles()">
-                    {{ showAllFiles() ? 'Ver por carpetas' : 'Ver archivos recientes' }}
+                <button class="toggle-view-btn" (click)="toggleAllFiles()" aria-keyshortcuts="Alt+A" title="Alt+A">
+                    <span class="btn-label">{{ showAllFiles() ? 'Ver por carpetas' : 'Ver archivos recientes' }}</span>
+                    <span class="btn-shortcut" aria-hidden="true">Alt+A</span>
                 </button>
             </div>
 
-            <!-- Navegación -->
             @if (!showAllFiles()) {
                 <div class="breadcrumbs">
                     @for (crumb of getBreadcrumbs(); track crumb.path) {
@@ -95,73 +182,86 @@
             }
 
             <div class="explorer-controls">
-                <!-- Búsqueda -->
                 <div class="search-box">
-                    <input type="text" 
-                           placeholder="Buscar archivos..." 
-                           [value]="searchQuery()"
-                           (input)="searchQuery.set($any($event.target).value)" />
+                    <input
+                        type="search"
+                        placeholder="Buscar por nombre, formato o etiqueta..."
+                        [value]="searchQuery()"
+                        (input)="searchQuery.set($any($event.target).value)"
+                    />
                 </div>
 
-                <!-- Filtros de tipo -->
                 <div class="file-types">
-                    @for (type of fileTypes | keyvalue; track type.key) {
-                        <button [class.active]="selectedFileType() === type.key"
-                                (click)="selectedFileType.set($any(type.key))">
-                            <span class="icon">{{ type.value.icon }}</span>
-                            <span class="label">{{ type.value.label }}</span>
+                    @for (type of fileTypeOptions; track type.key) {
+                        <button type="button" [class.active]="selectedFileType() === type.key" (click)="selectedFileType.set(type.key)">
+                            <lucide-icon class="icon" [img]="type.icon" [size]="16" aria-hidden="true"></lucide-icon>
+                            <span class="label">{{ type.label }}</span>
                         </button>
                     }
                 </div>
 
-                <!-- Cambio de vista -->
                 <div class="view-toggle">
                     @for (mode of viewModes; track mode.mode) {
-                        <button [class.active]="viewMode() === mode.mode"
-                                (click)="viewMode.set(mode.mode)"
-                                [title]="mode.label">
-                            {{ mode.icon }}
+                        <button type="button" [class.active]="viewMode() === mode.mode" (click)="viewMode.set(mode.mode)" [attr.aria-label]="mode.label" [title]="mode.label">
+                            <lucide-icon [img]="mode.icon" [size]="16" aria-hidden="true"></lucide-icon>
                         </button>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Contenido del Explorador -->
         <div class="explorer-content">
-            <!-- Carpetas -->
-            @if (!showAllFiles() && currentFolder().subfolders.length > 0) {
-                <div class="folders-section">
-                    <h4>Carpetas</h4>
-                    <div class="folders-grid">
-                        @for (folder of currentFolder().subfolders; track folder.path) {
-                            <div class="folder-item" (click)="navigateTo(folder.path)">
-                                <span class="folder-icon">📁</span>
-                                <span class="folder-name">{{ folder.name }}</span>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-
-            <!-- Archivos -->
-            <div class="files-section">
-                <h4>Archivos</h4>
-                <div class="files-container" [class]="viewMode()">
-                    @for (file of filteredFiles(); track file.id) {
-                        <div class="file-item" (click)="previewFile(file.fileType)">
-                            <div class="file-icon">{{ getFileTypeIcon(file.fileType) }}</div>
-                            <div class="file-info">
-                                <div class="file-name">{{ file.filename }}</div>
-                                <div class="file-meta">
-                                    <span class="date">{{ formatDate(file.uploadedAt) }}</span>
-                                    <span class="ticket">Ticket #{{ file.ticketId }}</span>
+            @if (loading()) {
+                <p class="empty-state">Cargando dashboard...</p>
+            } @else {
+                @if (!showAllFiles() && currentFolder().subfolders.length > 0) {
+                    <div class="folders-section">
+                        <h4>Carpetas</h4>
+                        <div class="folders-grid">
+                            @for (folder of currentFolder().subfolders; track folder.path) {
+                                <div class="folder-item" (click)="navigateTo(folder.path)">
+                                    <lucide-icon class="folder-icon" [img]="folderIcon" [size]="20" aria-hidden="true"></lucide-icon>
+                                    <span class="folder-name">{{ folder.name }}</span>
                                 </div>
-                            </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="files-section">
+                    <h4>Archivos</h4>
+                    @if (filteredFiles().length === 0) {
+                        <p class="empty-state">No hay archivos para los filtros actuales.</p>
+                    } @else {
+                        <div class="files-container" [class]="viewMode()">
+                            @for (file of filteredFiles(); track file.id) {
+                                <div class="file-item" [class.file-item-with-preview]="hasReadyThumbnail(file)" [class.file-item-without-preview]="!hasReadyThumbnail(file)" (click)="previewFile(file)">
+                                    @if (getThumbnailUrl(file); as thumbnailUrl) {
+                                        <div class="file-thumbnail">
+                                            <img [src]="thumbnailUrl" [alt]="'Miniatura de ' + file.filename" loading="lazy" />
+                                        </div>
+                                    }
+                                    <div class="file-info">
+                                        <div class="file-name">{{ file.filename }}</div>
+                                        <div class="file-badges">
+                                            <span class="file-badge">{{ getFileTypeLabel(file.fileType) }}</span>
+                                            <span class="file-badge">{{ file.fileFormat | uppercase }}</span>
+                                            @if (file.tag) {
+                                                <span class="file-badge file-badge-tag">{{ file.tag }}</span>
+                                            }
+                                        </div>
+                                        <div class="file-meta">
+                                            <span class="date">{{ formatDate(file.uploadedAt) }}</span>
+                                            <span class="ticket">Ticket #{{ file.ticketId }}</span>
+                                            <span class="size">{{ formatBytes(file.fileSizeBytes) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
-            </div>
+            }
         </div>
     </section>
 </div>

@@ -1,48 +1,93 @@
-@if (isEditing()) {
-  <section class="page-head">
-    <div>
+<section class="page-head">
+  <div>
+    @if (isEditing()) {
       <h1>Editar Cliente</h1>
-      <p class="page-subtitle">Actualizá datos de contacto y notas internas.</p>
-    </div>
-  </section>
-} @else {
-  <section class="page-head">
-    <div>
+      <p class="page-subtitle">Datos principales, contacto y notas en una sola vista.</p>
+    } @else {
       <h1>Alta de Cliente</h1>
-      <p class="page-subtitle">Carga rápida para asociar tickets.</p>
+      <p class="page-subtitle">Carga rápida para seguir con tickets sin fricción.</p>
+    }
+  </div>
+</section>
+
+<form class="entity-form form-shell form-shell-desktop form-shell-desktop-2" appEnterMovesFocus [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <section class="form-section-block">
+    <div class="form-section-head">
+      <h2>Identificación</h2>
+    </div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-field form-field-full">
+        <label class="label-required">Nombre</label>
+        <input formControlName="name" required autocomplete="name" enterkeyhint="next" placeholder="Nombre o razon social" />
+        @if (form.get('name')?.touched && form.get('name')?.invalid) {
+          <span class="error">Ingresá al menos 3 caracteres</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Documento</label>
+        <input formControlName="dni" [maxlength]="dniMaxLength" inputmode="numeric" autocomplete="off" enterkeyhint="next" placeholder="DNI, CUIT o similar" />
+        @if (form.get('dni')?.touched && form.get('dni')?.hasError('maxlength')) {
+          <span class="error">Hasta {{ dniMaxLength }} caracteres</span>
+        }
+      </div>
     </div>
   </section>
-}
-<form class="entity-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <div>
-    <label>Nombre</label>
-    <input formControlName="name" required />
-    @if (form.get('name')?.touched && form.get('name')?.invalid) {
-      <span class="error">Nombre requerido (mínimo 3 letras)</span>
-    }
+
+  <section class="form-section-block">
+    <div class="form-section-head">
+      <h2>Contacto</h2>
+    </div>
+
+    <div class="form-grid form-grid-2">
+      <div class="form-field">
+        <label>Teléfono</label>
+        <input formControlName="phone" [maxlength]="phoneMaxLength" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" placeholder="+54 11 ..." />
+        @if (form.get('phone')?.touched && form.get('phone')?.hasError('maxlength')) {
+          <span class="error">Hasta {{ phoneMaxLength }} caracteres</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Correo</label>
+        <input formControlName="email" type="email" autocomplete="email" enterkeyhint="next" placeholder="cliente@dominio.com" />
+        @if (form.get('email')?.touched && form.get('email')?.invalid) {
+          <span class="error">Correo inválido</span>
+        }
+      </div>
+
+      <div class="form-field form-field-full">
+        <label>Dirección</label>
+        <input formControlName="address" autocomplete="street-address" enterkeyhint="next" placeholder="Dirección, ciudad o referencia" />
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section-block form-section-full-width">
+    <div class="form-section-head">
+      <h2>Notas</h2>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Detalle</label>
+        <textarea formControlName="notes" placeholder="Ej: Cliente frecuente, prefiere WhatsApp, horario de retiro..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="form-actions">
+    <span class="form-actions-note">Enter avanza entre campos.</span>
+    <div class="form-actions-group">
+      <button class="btn btn-secondary" type="button" (click)="cancel()" aria-keyshortcuts="Esc" title="Esc">
+        <span class="btn-label">Cancelar</span>
+        <span class="btn-shortcut" aria-hidden="true">Esc</span>
+      </button>
+      <button class="btn" type="submit" [disabled]="form.invalid" aria-keyshortcuts="Control+S Meta+S" title="Ctrl/Cmd + S">
+        <span class="btn-label">Guardar cliente</span>
+        <span class="btn-shortcut" aria-hidden="true">Ctrl/Cmd+S</span>
+      </button>
+    </div>
   </div>
-  <div>
-    <label>DNI</label>
-    <input formControlName="dni" />
-  </div>
-  <div>
-    <label>Teléfono</label>
-    <input formControlName="phone" />
-  </div>
-  <div>
-    <label>Email</label>
-    <input formControlName="email" type="email" />
-    @if (form.get('email')?.touched && form.get('email')?.invalid) {
-      <span class="error">Email inválido</span>
-    }
-  </div>
-  <div>
-    <label>Dirección</label>
-    <input formControlName="address" />
-  </div>
-  <div>
-    <label>Notas</label>
-    <textarea formControlName="notes"></textarea>
-  </div>
-  <button class="btn" type="submit" [disabled]="form.invalid">Guardar cliente</button>
 </form>

@@ -1,197 +1,143 @@
-import { Ticket } from '../ticket.model';
-import { Client } from '../client.model';
 import { Attachment } from '../attachment.model';
+import { DashboardStats, FileFolder } from '../dashboard.model';
+import { createMockAttachmentThumbnailDataUrl } from '../../shared/mock-attachment-thumbnail';
 
-export interface DashboardStats {
-    ticketsByStatus: { [key: string]: number };
-    ticketsByMonth: { month: string; count: number }[];
-    clientGrowth: { month: string; total: number }[];
-    partsUsage: { name: string; count: number }[];
-    topClients: { name: string; ticketCount: number }[];
-    recentFiles: Attachment[];
-}
-
-export interface FileFolder {
-    name: string;
-    path: string;
-    files: Attachment[];
-    subfolders: FileFolder[];
-}
+const attachment = (
+    id: number,
+    ticketId: number,
+    filename: string,
+    filepath: string,
+    fileType: Attachment['fileType'],
+    fileFormat: string,
+    uploadedAt: string,
+    tag?: string
+): Attachment => ({
+    id,
+    ticketId,
+    filename,
+    filepath,
+    fileType,
+    fileFormat,
+    thumbnailUrl: createMockAttachmentThumbnailDataUrl(filename, fileType, fileFormat, tag),
+    tag,
+    uploadedAt
+});
 
 export const MOCK_FILE_STRUCTURE: FileFolder[] = [
     {
-        name: 'Contratos',
-        path: '/contratos',
+        name: 'Documentos',
+        path: '/document',
         files: [
-            {
-                id: 1,
-                ticketId: 1,
-                filename: 'contrato-reparacion-001.pdf',
-                filepath: '/contratos/contrato-reparacion-001.pdf',
-                fileType: 'contract',
-                uploadedAt: '2025-08-20T10:30:00Z'
-            },
-            {
-                id: 2,
-                ticketId: 2,
-                filename: 'contrato-reparacion-002.pdf',
-                filepath: '/contratos/contrato-reparacion-002.pdf',
-                fileType: 'contract',
-                uploadedAt: '2025-08-19T15:30:00Z'
-            }
+            attachment(1, 1, 'presupuesto-smart-tv.pdf', '/document/presupuesto-smart-tv.pdf', 'document', 'pdf', '2026-03-10T10:30:00Z', 'Presupuesto'),
+            attachment(2, 2, 'manual-instalacion-router.docx', '/document/manual-instalacion-router.docx', 'document', 'docx', '2026-03-09T15:30:00Z', 'Manual')
         ],
         subfolders: []
     },
     {
-        name: 'Facturas',
-        path: '/facturas',
+        name: 'Planillas',
+        path: '/spreadsheet',
         files: [
-            {
-                id: 3,
-                ticketId: 1,
-                filename: 'factura-repuestos-001.pdf',
-                filepath: '/facturas/factura-repuestos-001.pdf',
-                fileType: 'invoice',
-                uploadedAt: '2025-08-20T11:00:00Z'
-            }
+            attachment(3, 3, 'stock-repuestos-marzo.csv', '/spreadsheet/stock-repuestos-marzo.csv', 'spreadsheet', 'csv', '2026-03-11T11:00:00Z', 'Stock')
         ],
         subfolders: [
             {
-                name: '2025',
-                path: '/facturas/2025',
+                name: 'Costos',
+                path: '/spreadsheet/costos',
                 files: [
-                    {
-                        id: 4,
-                        ticketId: 3,
-                        filename: 'factura-repuestos-003.pdf',
-                        filepath: '/facturas/2025/factura-repuestos-003.pdf',
-                        fileType: 'invoice',
-                        uploadedAt: '2025-08-18T09:30:00Z'
-                    }
+                    attachment(4, 3, 'costos-servicio-impresoras.xlsx', '/spreadsheet/costos/costos-servicio-impresoras.xlsx', 'spreadsheet', 'xlsx', '2026-03-08T09:30:00Z', 'Costos')
                 ],
                 subfolders: []
             }
         ]
     },
     {
-        name: 'Fotos',
-        path: '/fotos',
+        name: 'Imagenes',
+        path: '/image',
         files: [],
         subfolders: [
             {
-                name: 'Diagnósticos',
-                path: '/fotos/diagnosticos',
+                name: 'Escaneos',
+                path: '/image/escaneos',
                 files: [
-                    {
-                        id: 5,
-                        ticketId: 1,
-                        filename: 'diagnostico-001.jpg',
-                        filepath: '/fotos/diagnosticos/diagnostico-001.jpg',
-                        fileType: 'photo',
-                        uploadedAt: '2025-08-20T10:35:00Z'
-                    },
-                    {
-                        id: 6,
-                        ticketId: 2,
-                        filename: 'diagnostico-002.jpg',
-                        filepath: '/fotos/diagnosticos/diagnostico-002.jpg',
-                        fileType: 'photo',
-                        uploadedAt: '2025-08-19T14:20:00Z'
-                    }
+                    attachment(5, 1, 'placa-fuente-scan.png', '/image/escaneos/placa-fuente-scan.png', 'image', 'png', '2026-03-10T10:35:00Z', 'Escaneo'),
+                    attachment(6, 2, 'conector-red-detalle.jpg', '/image/escaneos/conector-red-detalle.jpg', 'image', 'jpg', '2026-03-09T14:20:00Z', 'Foto')
                 ],
                 subfolders: []
             },
             {
-                name: 'Reparaciones',
-                path: '/fotos/reparaciones',
+                name: 'Esquemas',
+                path: '/image/esquemas',
                 files: [
-                    {
-                        id: 7,
-                        ticketId: 1,
-                        filename: 'reparacion-001.jpg',
-                        filepath: '/fotos/reparaciones/reparacion-001.jpg',
-                        fileType: 'photo',
-                        uploadedAt: '2025-08-20T16:45:00Z'
-                    }
+                    attachment(7, 3, 'diagrama-senal-router.webp', '/image/esquemas/diagrama-senal-router.webp', 'image', 'webp', '2026-03-10T16:45:00Z', 'Esquema')
                 ],
                 subfolders: []
             }
         ]
+    },
+    {
+        name: 'Backups',
+        path: '/archive',
+        files: [
+            attachment(8, 3, 'backup-ticket-router.zip', '/archive/backup-ticket-router.zip', 'archive', 'zip', '2026-03-07T08:10:00Z', 'Backup')
+        ],
+        subfolders: []
     }
 ];
 
-// Lista plana de los últimos archivos para vista rápida
-export const MOCK_RECENT_FILES: Attachment[] = [
-    ...MOCK_FILE_STRUCTURE[2].subfolders[0].files,
-    ...MOCK_FILE_STRUCTURE[0].files,
-    ...MOCK_FILE_STRUCTURE[1].files,
-    ...MOCK_FILE_STRUCTURE[2].subfolders[1].files
-].sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+export const MOCK_RECENT_FILES: Attachment[] = MOCK_FILE_STRUCTURE
+    .flatMap((folder) => [
+        ...folder.files,
+        ...folder.subfolders.flatMap((subfolder) => subfolder.files)
+    ])
+    .sort((left, right) => new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime());
 
 export const MOCK_DASHBOARD_STATS: DashboardStats = {
     ticketsByStatus: {
-        'received': 15,
-        'diagnosing': 8,
-        'waiting_parts': 12,
-        'repairing': 5,
-        'repaired': 25,
-        'returned': 18,
-        'cancelled': 3
+        received: 9,
+        diagnosing: 6,
+        waiting_parts: 4,
+        repairing: 7,
+        repaired: 13,
+        returned: 11,
+        cancelled: 1
     },
     ticketsByMonth: [
-        { month: 'Ene', count: 28 },
-        { month: 'Feb', count: 32 },
-        { month: 'Mar', count: 37 },
-        { month: 'Abr', count: 35 },
-        { month: 'May', count: 42 },
-        { month: 'Jun', count: 38 }
+        { month: 'Oct', count: 16 },
+        { month: 'Nov', count: 18 },
+        { month: 'Dic', count: 21 },
+        { month: 'Ene', count: 19 },
+        { month: 'Feb', count: 24 },
+        { month: 'Mar', count: 27 }
     ],
     clientGrowth: [
-        { month: 'Ene', total: 120 },
-        { month: 'Feb', total: 145 },
-        { month: 'Mar', total: 168 },
-        { month: 'Abr', total: 189 },
-        { month: 'May', total: 210 },
-        { month: 'Jun', total: 235 }
+        { month: 'Oct', total: 54 },
+        { month: 'Nov', total: 61 },
+        { month: 'Dic', total: 69 },
+        { month: 'Ene', total: 74 },
+        { month: 'Feb', total: 82 },
+        { month: 'Mar', total: 91 }
     ],
     partsUsage: [
-        { name: 'Display LCD', count: 45 },
-        { name: 'Batería', count: 38 },
-        { name: 'Placa madre', count: 15 },
-        { name: 'Fuente', count: 22 },
-        { name: 'Memoria RAM', count: 30 }
+        { name: 'Fuente universal', count: 11 },
+        { name: 'Flex de display', count: 8 },
+        { name: 'Conector DC', count: 7 },
+        { name: 'Ventilador 80mm', count: 5 },
+        { name: 'Modulo Wi-Fi', count: 4 }
     ],
     topClients: [
-        { name: 'Empresa ABC', ticketCount: 15 },
-        { name: 'Juan Pérez', ticketCount: 8 },
-        { name: 'María García', ticketCount: 7 },
-        { name: 'TechStore', ticketCount: 6 },
-        { name: 'Carlos López', ticketCount: 5 }
+        { name: 'Hospital Central', ticketCount: 9 },
+        { name: 'Libreria Sur', ticketCount: 6 },
+        { name: 'Juan Perez', ticketCount: 4 },
+        { name: 'Marina Costa', ticketCount: 4 },
+        { name: 'RedNet SRL', ticketCount: 3 }
     ],
-    recentFiles: [
-        {
-            id: 1,
-            ticketId: 1,
-            filename: 'contrato-reparacion.pdf',
-            filepath: '/contratos/001.pdf',
-            fileType: 'contract',
-            uploadedAt: '2025-08-20T10:30:00Z'
-        },
-        {
-            id: 2,
-            ticketId: 1,
-            filename: 'foto-diagnóstico.jpg',
-            filepath: '/fotos/002.jpg',
-            fileType: 'photo',
-            uploadedAt: '2025-08-20T10:35:00Z'
-        },
-        {
-            id: 3,
-            ticketId: 2,
-            filename: 'factura-repuestos.pdf',
-            filepath: '/facturas/003.pdf',
-            fileType: 'invoice',
-            uploadedAt: '2025-08-20T11:00:00Z'
-        }
-    ]
+    storage: {
+        usedBytes: 41287680,
+        fileCount: 28,
+        totalBytes: 268435456,
+        availableBytes: 227147776,
+        usagePercent: 15.38,
+        source: 'configured'
+    },
+    recentFiles: MOCK_RECENT_FILES
 };

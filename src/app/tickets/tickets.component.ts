@@ -1,9 +1,10 @@
-import { Component, computed, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { TicketsService } from '../service/tickets.service';
 import { Ticket, TicketStatus, TicketStatusDefinition } from '../models/ticket.model';
 import { LocaleDateService } from '../service/locale-date.service';
+import { isEditableShortcutTarget } from '../shared/keyboard-shortcuts';
 
 type StatusFilterValue = 'all' | TicketStatus;
 type StatusFilterOption = { value: StatusFilterValue; label: string };
@@ -27,6 +28,7 @@ const STATUS_LABELS: Record<TicketStatus, string> = {
 })
 export class TicketsComponent {
     private ticketService = inject(TicketsService);
+    private readonly router = inject(Router);
     private readonly localeDate = inject(LocaleDateService);
     tickets = signal<Ticket[]>([]);
     statusDefinitions = signal<TicketStatusDefinition[]>(this.fallbackStatusDefinitions());
@@ -75,6 +77,17 @@ export class TicketsComponent {
     constructor() {
         this.loadStatusDefinitions();
         this.loadTickets();
+    }
+
+    @HostListener('window:keydown.alt.n', ['$event'])
+    onCreateShortcut(event: Event): void {
+        const keyboardEvent = event as KeyboardEvent;
+        if (isEditableShortcutTarget(keyboardEvent.target)) {
+            return;
+        }
+
+        keyboardEvent.preventDefault();
+        void this.router.navigate(['/tickets/nuevo']);
     }
 
     retryLoad(): void {

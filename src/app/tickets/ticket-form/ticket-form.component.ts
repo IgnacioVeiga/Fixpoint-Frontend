@@ -1,19 +1,20 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AttachmentUploaderComponent } from '../../shared/attachment-uploader/attachment-uploader.component';
 import { Client } from '../../models/client.model';
 import { InventoryItem } from '../../models/inventory.model';
 import { CreateTicketLogRequest, TicketLog } from '../../models/ticket-log.model';
 import { AddTicketPartRequest, TicketPart } from '../../models/ticket-part.model';
 import { SaveTicketRequest, TicketStatus, TicketStatusDefinition } from '../../models/ticket.model';
-import { AttachmentUploaderComponent } from '../../shared/attachment-uploader/attachment-uploader.component';
 import { ClientsService } from '../../service/clients.service';
 import { InventoryService } from '../../service/inventory.service';
 import { TicketLogsService } from '../../service/ticket-logs.service';
 import { TicketPartsService } from '../../service/ticket-parts.service';
 import { TicketsService } from '../../service/tickets.service';
 import { LocaleDateService } from '../../service/locale-date.service';
+import { EnterMovesFocusDirective } from '../../shared/enter-moves-focus.directive';
 
 type StatusOption = { value: TicketStatus; label: string };
 
@@ -33,7 +34,7 @@ const STATUS_LABELS: Record<TicketStatus, string> = {
   styleUrls: ['./ticket-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, AttachmentUploaderComponent]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, AttachmentUploaderComponent, EnterMovesFocusDirective]
 })
 export class TicketFormComponent {
   private readonly ticketService = inject(TicketsService);
@@ -48,13 +49,19 @@ export class TicketFormComponent {
 
   readonly isEditing = signal(false);
   readonly editingId = signal<number | null>(null);
-
   readonly clients = signal<Client[]>([]);
   readonly inventoryItems = signal<InventoryItem[]>([]);
   readonly ticketLogs = signal<TicketLog[]>([]);
   readonly ticketParts = signal<TicketPart[]>([]);
   readonly statusDefinitions = signal<TicketStatusDefinition[]>(this.fallbackStatusDefinitions());
   readonly currentTicketStatus = signal<TicketStatus | null>(null);
+  readonly deviceTypeSuggestions = ['Televisor', 'Celular', 'Notebook', 'Tablet', 'Impresora', 'Router'];
+  readonly authorSuggestions = ['Mostrador', 'Taller', 'Tecnico', 'Recepcion'];
+  readonly inventorySuggestions = computed(() =>
+    this.inventoryItems()
+      .slice()
+      .sort((left, right) => right.quantity - left.quantity || left.name.localeCompare(right.name))
+  );
   readonly statusOptions = computed<StatusOption[]>(() =>
     this.resolveVisibleStatuses().map((status) => ({
       value: status.value,
@@ -94,6 +101,33 @@ export class TicketFormComponent {
     this.loadCurrentTicketIfNeeded();
   }
 
+  @HostListener('window:keydown.control.s', ['$event'])
+  @HostListener('window:keydown.meta.s', ['$event'])
+  onKeyboardSave(event: Event): void {
+    event.preventDefault();
+    this.submit();
+  }
+
+  @HostListener('window:keydown.escape', ['$event'])
+  onCancelShortcut(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.defaultPrevented || keyboardEvent.altKey || keyboardEvent.ctrlKey || keyboardEvent.metaKey || keyboardEvent.shiftKey) {
+      return;
+    }
+
+    keyboardEvent.preventDefault();
+    this.cancel();
+  }
+
+  cancel(): void {
+    const hasPendingChanges = this.form.dirty || this.logForm.dirty || this.partForm.dirty;
+    if (hasPendingChanges && !confirm('Hay cambios sin guardar. ¿Querés cancelar igualmente?')) {
+      return;
+    }
+
+    void this.router.navigate(['/tickets']);
+  }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -106,7 +140,7 @@ export class TicketFormComponent {
       if (!id) return;
 
       this.ticketService.updateTicket(id, payload).subscribe({
-        next: () => this.router.navigate(['/tickets']),
+        next: () => void this.router.navigate(['/tickets']),
         error: (error) => {
           console.error('Error al actualizar ticket:', error);
           alert(this.extractErrorMessage(error, 'No se pudo actualizar el ticket.'));
@@ -116,7 +150,7 @@ export class TicketFormComponent {
     }
 
     this.ticketService.createTicket(payload).subscribe({
-      next: (ticket) => this.router.navigate(['/tickets', ticket.id]),
+      next: (ticket) => void this.router.navigate(['/tickets', ticket.id]),
       error: (error) => {
         console.error('Error al crear ticket:', error);
         alert(this.extractErrorMessage(error, 'No se pudo crear el ticket.'));
@@ -244,9 +278,7 @@ export class TicketFormComponent {
   private loadStatusDefinitions(): void {
     this.ticketService.listStatusDefinitions().subscribe({
       next: (definitions) => {
-        this.statusDefinitions.set(
-          definitions.length > 0 ? definitions : this.fallbackStatusDefinitions()
-        );
+        this.statusDefinitions.set(definitions.length > 0 ? definitions : this.fallbackStatusDefinitions());
         this.ensureStatusValueIsValid();
       },
       error: (error) => {

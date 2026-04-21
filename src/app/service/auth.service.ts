@@ -23,7 +23,7 @@ export class AuthService {
       rememberMe: Boolean(request.rememberMe)
     };
 
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(this.buildMockSession(normalizedRequest.username, normalizedRequest.rememberMe ?? false)).pipe(
         tap((session) => this.sessionStore.setSession(session))
       );
@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   initializeSession(): Observable<void> {
-    if (this.initialized || environment.useMockFallback) {
+    if (this.initialized || environment.useMockApi) {
       this.initialized = true;
       return of(void 0);
     }
@@ -59,7 +59,7 @@ export class AuthService {
   }
 
   refreshSession(): Observable<AuthSession> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(this.buildMockSession('mock-tech', false)).pipe(
         tap((session) => this.sessionStore.setSession(session))
       );
@@ -85,7 +85,7 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       this.sessionStore.clearSession();
       return of(void 0);
     }

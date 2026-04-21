@@ -12,7 +12,7 @@ export class TicketsService {
   private readonly endpoint = 'tickets';
 
   listStatusDefinitions(): Observable<TicketStatusDefinition[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(MOCK_TICKET_STATUS_DEFINITIONS);
     }
 
@@ -22,7 +22,7 @@ export class TicketsService {
   }
 
   listTickets(): Observable<Ticket[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(MOCK_TICKETS);
     }
 
@@ -32,7 +32,7 @@ export class TicketsService {
   }
 
   getTicket(id: number): Observable<Ticket> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const ticket = MOCK_TICKETS.find((item) => item.id === id);
       if (!ticket) {
         return throwError(() => new Error('Ticket no encontrado'));
@@ -46,7 +46,7 @@ export class TicketsService {
   }
 
   createTicket(ticket: SaveTicketRequest): Observable<Ticket> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const mockTicket: Ticket = {
         ...ticket,
         id: MOCK_TICKETS.length + 1,
@@ -63,7 +63,7 @@ export class TicketsService {
   }
 
   updateTicket(id: number, ticket: SaveTicketRequest): Observable<Ticket> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_TICKETS.findIndex((item) => item.id === id);
       if (index < 0) {
         return throwError(() => new Error('Ticket no encontrado'));
@@ -85,7 +85,7 @@ export class TicketsService {
   }
 
   deleteTicket(id: number): Observable<void> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_TICKETS.findIndex((item) => item.id === id);
       if (index < 0) {
         return throwError(() => new Error('Ticket no encontrado'));

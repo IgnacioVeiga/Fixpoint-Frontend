@@ -43,10 +43,10 @@ Common issues when integrating frontend with backend environments.
 ### Expected Behavior
 
 - In `mock` environment:
-  - `useMockFallback=true`
+  - `useMockApi=true`
   - frontend can work without backend
 - In `dev/qa/prod`:
-  - `useMockFallback=false`
+  - `useMockApi=false`
   - backend integration is expected
 
 ## 6. Local Network (LAN) Access Fails
@@ -57,3 +57,22 @@ Common issues when integrating frontend with backend environments.
   - `npm run start:dev -- --host 0.0.0.0 --port 4200`
 - Update selected environment `apiBaseUrl` to backend LAN IP.
 - Add LAN frontend origin to backend `CORS_ALLOWED_ORIGINS`.
+
+## 7. CI Fails with "No usable sandbox" in ChromeHeadless
+
+### Symptom
+
+- GitHub Actions fails during `npm run test:ci` with:
+  - `No usable sandbox`
+
+### Cause
+
+- Some Linux runners restrict Chrome sandbox/user namespaces.
+
+### Fix
+
+- Use a wrapper launcher in CI that runs Chrome with:
+  - `--no-sandbox`
+  - `--disable-setuid-sandbox`
+  - `--disable-dev-shm-usage`
+- This is already configured in `.github/workflows/ci.yml`.

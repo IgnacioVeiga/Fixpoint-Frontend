@@ -24,11 +24,25 @@
 </header>
 
 <nav class="main-nav" *ngIf="showNavigation()">
-  <a [routerLink]="'/'" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Panel</a>
-  <a [routerLink]="'/tickets'" routerLinkActive="active">Tickets</a>
-  <a [routerLink]="'/inventario'" routerLinkActive="active">Inventario</a>
-  <a [routerLink]="'/clientes'" routerLinkActive="active">Clientes</a>
-  <a [routerLink]="'/tickets/nuevo'" class="quick-link">+ Ticket</a>
+  @for (link of navLinks; track link.route) {
+    <a
+      [routerLink]="link.route"
+      class="nav-link"
+      #navState="routerLinkActive"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: !!link.exact }"
+      [attr.aria-keyshortcuts]="navState.isActive ? null : link.shortcut"
+      [title]="navState.isActive ? null : link.shortcut">
+      <span class="btn-label">{{ link.label }}</span>
+      @if (!navState.isActive) {
+        <span class="btn-shortcut" aria-hidden="true">{{ link.shortcut }}</span>
+      }
+    </a>
+  }
+  <a [routerLink]="'/tickets/nuevo'" class="quick-link" aria-keyshortcuts="Alt+T" title="Alt+T">
+    <span class="btn-label">+ Ticket</span>
+    <span class="btn-shortcut" aria-hidden="true">Alt+T</span>
+  </a>
 </nav>
 
 <main class="app-content" [class.app-content-auth]="!showNavigation()">

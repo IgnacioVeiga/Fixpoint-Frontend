@@ -1,6 +1,9 @@
 name: Frontend CI
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
@@ -16,8 +19,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -26,9 +30,18 @@ jobs:
         id: setup-chrome
         uses: browser-actions/setup-chrome@v1
 
+      - name: Prepare Chrome launcher for sandbox-restricted runner
+        run: |
+          cat <<'EOF' >/tmp/chrome-no-sandbox
+          #!/usr/bin/env bash
+          exec "$CHROME_REAL_BIN" --no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage "$@"
+          EOF
+          chmod +x /tmp/chrome-no-sandbox
+
       - name: Run unit tests
         env:
-          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROME_REAL_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROME_BIN: /tmp/chrome-no-sandbox
         run: npm run test:ci
 
       - name: Build application

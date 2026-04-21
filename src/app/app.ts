@@ -1,13 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './service/auth.service';
 import { AuthSessionService } from './service/auth-session.service';
+import { isEditableShortcutTarget } from './shared/keyboard-shortcuts';
 
 type ThemeMode = 'light' | 'dark';
+
+type NavShortcutLink = {
+  label: string;
+  route: string;
+  shortcut: string;
+  exact?: boolean;
+};
 
 @Component({
   selector: 'app-root',
@@ -21,9 +29,15 @@ export class App {
   private readonly destroyRef = inject(DestroyRef);
   private readonly authService = inject(AuthService);
   private readonly sessionStore = inject(AuthSessionService);
+  readonly navLinks: NavShortcutLink[] = [
+    { label: 'Panel', route: '/', shortcut: 'Alt+1', exact: true },
+    { label: 'Tickets', route: '/tickets', shortcut: 'Alt+2' },
+    { label: 'Inventario', route: '/inventario', shortcut: 'Alt+3' },
+    { label: 'Clientes', route: '/clientes', shortcut: 'Alt+4' }
+  ];
 
   readonly environmentName = environment.name.toUpperCase();
-  readonly mockMode = environment.useMockFallback;
+  readonly mockMode = environment.useMockApi;
   readonly session = this.sessionStore.session;
   readonly isAuthenticated = computed(() => this.sessionStore.isAuthenticated());
   readonly currentUrl = signal(this.router.url);
@@ -59,6 +73,32 @@ export class App {
         void this.router.navigate(['/login']);
       }
     });
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyboardShortcut(event: KeyboardEvent): void {
+    if (!this.showNavigation() || isEditableShortcutTarget(event.target)) {
+      return;
+    }
+
+    if (event.defaultPrevented || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+      return;
+    }
+
+    const normalizedKey = event.key.toLowerCase();
+    if (normalizedKey === 't') {
+      event.preventDefault();
+      void this.router.navigate(['/tickets/nuevo']);
+      return;
+    }
+
+    const navIndex = Number.parseInt(normalizedKey, 10) - 1;
+    if (Number.isNaN(navIndex) || navIndex < 0 || navIndex >= this.navLinks.length) {
+      return;
+    }
+
+    event.preventDefault();
+    void this.router.navigate([this.navLinks[navIndex].route]);
   }
 
   private getInitialTheme(): ThemeMode {

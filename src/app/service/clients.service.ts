@@ -12,7 +12,7 @@ export class ClientsService {
   private readonly endpoint = 'clients';
 
   listClients(): Observable<Client[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(MOCK_CLIENTS);
     }
 
@@ -22,7 +22,7 @@ export class ClientsService {
   }
 
   getClient(id: number): Observable<Client> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const client = MOCK_CLIENTS.find((item) => item.id === id);
       if (!client) {
         return throwError(() => new Error('Cliente no encontrado'));
@@ -36,7 +36,7 @@ export class ClientsService {
   }
 
   createClient(client: Omit<Client, 'id'>): Observable<Client> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const mockClient: Client = {
         ...client,
         id: MOCK_CLIENTS.length + 1,
@@ -52,7 +52,7 @@ export class ClientsService {
   }
 
   updateClient(id: number, client: Omit<Client, 'id'>): Observable<Client> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_CLIENTS.findIndex((item) => item.id === id);
       if (index < 0) {
         return throwError(() => new Error('Cliente no encontrado'));
@@ -69,7 +69,7 @@ export class ClientsService {
   }
 
   deleteClient(id: number): Observable<void> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_CLIENTS.findIndex((item) => item.id === id);
       if (index < 0) {
         return throwError(() => new Error('Cliente no encontrado'));

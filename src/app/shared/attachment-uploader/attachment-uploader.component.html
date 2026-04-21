@@ -15,38 +15,82 @@
       class="file-input"
     />
     <div class="upload-message">
-      <span class="upload-icon">📤</span>
+      <lucide-icon class="upload-icon" [img]="uploadIcon" [size]="30" aria-hidden="true"></lucide-icon>
       <p>
         Arrastrá archivos o
         <button class="browse-btn" type="button" (click)="fileInput.click()">seleccionalos</button>
       </p>
-      <p class="upload-info">
-        Tipos:
-        @for (type of allowedTypes; track type) {
-          <span class="file-type">{{ getFileTypeIcon(type) }} {{ type }}</span>
-        }
-      </p>
+      <p class="upload-info">{{ allowedTypesSummary }}</p>
       <p class="size-info">Máx por archivo: {{ formatFileSize(maxFileSize) }}</p>
     </div>
   </div>
 
-  @if (uploading()) {
-    <div class="upload-progress">
-      <div class="spinner"></div>
-      <span>Subiendo archivos...</span>
-    </div>
+  @if (pendingUploads().length > 0) {
+    <section class="upload-queue">
+      <div class="queue-head">
+        <div>
+          <h3>Antes de subir</h3>
+          <p>Revisá formato y completá una etiqueta opcional para identificar el contenido.</p>
+        </div>
+        <div class="queue-actions">
+          <button class="btn btn-secondary" type="button" (click)="clearPendingUploads()">Limpiar</button>
+          <button class="btn" type="button" (click)="uploadPendingFiles()" [disabled]="uploading()">
+            {{ uploading() ? 'Subiendo...' : 'Subir seleccionados' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="pending-list">
+        @for (draft of pendingUploads(); track draft.id) {
+          <article class="pending-item">
+            <div class="pending-item-main">
+              <lucide-icon class="attachment-icon" [img]="getFileTypeIcon(draft.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
+              <div class="attachment-info">
+                <span class="attachment-name">{{ draft.file.name }}</span>
+                <span class="attachment-meta">
+                  {{ getFileTypeLabel(draft.fileType) }} • {{ formatAttachmentFormat(draft.fileFormat) }} • {{ formatFileSize(draft.file.size) }}
+                </span>
+              </div>
+              <button class="delete-btn" type="button" (click)="removePendingUpload(draft.id)">Quitar</button>
+            </div>
+
+            <div class="pending-tag">
+              <label>Etiqueta opcional</label>
+              <input
+                type="text"
+                [value]="draft.tag"
+                placeholder="Ej: Diagnostico, Escaneo, Presupuesto"
+                (input)="updateDraftTag(draft.id, $any($event.target).value)"
+              />
+              <div class="tag-suggestions">
+                @for (suggestion of getTagSuggestions(draft.fileType); track suggestion) {
+                  <button type="button" class="tag-chip" (click)="applySuggestedTag(draft.id, suggestion)">
+                    {{ suggestion }}
+                  </button>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
   }
 
   @if (attachments().length > 0) {
     <div class="attachments-list">
       @for (attachment of attachments(); track attachment.id) {
         <div class="attachment-item" (click)="previewFile(attachment)">
-          <span class="attachment-icon">{{ getFileTypeIcon(attachment.fileType) }}</span>
+          <lucide-icon class="attachment-icon" [img]="getFileTypeIcon(attachment.fileType)" [size]="18" aria-hidden="true"></lucide-icon>
           <div class="attachment-info">
             <span class="attachment-name">{{ attachment.filename }}</span>
-            <span class="attachment-meta">
-              {{ attachment.fileType }} • {{ formatAttachmentDate(attachment.uploadedAt) }}
-            </span>
+            <div class="attachment-badges">
+              <span class="attachment-badge">{{ getFileTypeLabel(attachment.fileType) }}</span>
+              <span class="attachment-badge">{{ formatAttachmentFormat(attachment.fileFormat) }}</span>
+              @if (attachment.tag) {
+                <span class="attachment-badge attachment-badge-tag">{{ attachment.tag }}</span>
+              }
+            </div>
+            <span class="attachment-meta">{{ formatAttachmentDate(attachment.uploadedAt) }}</span>
           </div>
           <button class="delete-btn" type="button" (click)="deleteAttachment(attachment, $event)">Eliminar</button>
         </div>

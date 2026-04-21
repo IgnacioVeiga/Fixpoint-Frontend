@@ -10,9 +10,21 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { Attachment, AttachmentType } from '../../models/attachment.model';
+import {
+  ATTACHMENT_TYPE_DEFINITIONS,
+  Attachment,
+  AttachmentType,
+  AttachmentUploadDraft,
+  detectAttachmentMetadata,
+  formatAttachmentFormat,
+  getAttachmentTagSuggestions,
+  getAttachmentTypeIcon,
+  getAttachmentTypeLabel
+} from '../../models/attachment.model';
+import { LucideAngularModule, type LucideIconData } from 'lucide-angular';
 import { AttachmentsService } from '../../service/attachments.service';
 import { LocaleDateService } from '../../service/locale-date.service';
+import { UI_ICONS } from '../ui-icons';
 
 @Component({
   selector: 'app-attachment-uploader',
@@ -20,24 +32,19 @@ import { LocaleDateService } from '../../service/locale-date.service';
   styleUrls: ['./attachment-uploader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, LucideAngularModule]
 })
 export class AttachmentUploaderComponent implements OnChanges {
   @Input() ticketId?: number;
   @Input() maxFileSize = 10 * 1024 * 1024;
-  @Input() allowedTypes: AttachmentType[] = ['photo', 'contract', 'invoice', 'other'];
+  @Input() allowedTypes: AttachmentType[] = ['image', 'document', 'spreadsheet', 'archive'];
   @Output() attachmentsChange = new EventEmitter<Attachment[]>();
 
-  private readonly fileTypes: Record<AttachmentType, { icon: string; accept: string }> = {
-    photo: { icon: '📷', accept: 'image/*' },
-    contract: { icon: '📄', accept: '.pdf' },
-    invoice: { icon: '🧾', accept: '.pdf' },
-    other: { icon: '📎', accept: '.pdf,image/*' }
-  };
-
   readonly attachments = signal<Attachment[]>([]);
+  readonly pendingUploads = signal<AttachmentUploadDraft[]>([]);
   readonly uploading = signal(false);
   readonly dragOver = signal(false);
+  readonly uploadIcon = UI_ICONS.upload;
 
   constructor(
     private readonly attachmentService: AttachmentsService,
@@ -51,14 +58,47 @@ export class AttachmentUploaderComponent implements OnChanges {
   }
 
   get acceptedFileTypes(): string {
-    return this.allowedTypes
-      .map((type) => this.fileTypes[type]?.accept ?? '')
-      .filter((accept) => accept.length > 0)
-      .join(',');
+    return Array.from(
+      new Set(
+        this.allowedTypes.flatMap((type) => ATTACHMENT_TYPE_DEFINITIONS[type]?.accept ?? [])
+      )
+    ).join(',');
   }
 
-  getFileTypeIcon(type: AttachmentType): string {
-    return this.fileTypes[type]?.icon ?? this.fileTypes.other.icon;
+  get allowedTypesSummary(): string {
+    return this.allowedTypes
+      .map((type) => {
+        const definition = ATTACHMENT_TYPE_DEFINITIONS[type];
+        const formats = definition.accept.map((extension) => extension.replace('.', '').toUpperCase()).join(', ');
+        return `${definition.label}: ${formats}`;
+      })
+      .join(' · ');
+  }
+
+  getFileTypeIcon(type: AttachmentType): LucideIconData {
+    return getAttachmentTypeIcon(type);
+  }
+
+  getFileTypeLabel(type: AttachmentType): string {
+    return getAttachmentTypeLabel(type);
+  }
+
+  getTagSuggestions(type: AttachmentType): string[] {
+    return getAttachmentTagSuggestions(type);
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  formatAttachmentDate(value: string): string {
+    return this.localeDate.formatDateTime(value);
+  }
+
+  formatAttachmentFormat(value: string): string {
+    return formatAttachmentFormat(value);
   }
 
   onDragOver(event: DragEvent): void {
@@ -80,25 +120,102 @@ export class AttachmentUploaderComponent implements OnChanges {
 
     const files = event.dataTransfer?.files;
     if (files) {
-      void this.handleFiles(files);
+      this.queueFiles(files);
     }
   }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
-      void this.handleFiles(input.files);
+      this.queueFiles(input.files);
       input.value = '';
     }
   }
 
-  previewFile(attachment: Attachment): void {
+  updateDraftTag(id: string, value: string): void {
+    this.pendingUploads.update((drafts) =>
+      drafts.map((draft) => draft.id === id ? { ...draft, tag: value } : draft)
+    );
+  }
+
+  applySuggestedTag(id: string, suggestion: string): void {
+    this.updateDraftTag(id, suggestion);
+  }
+
+  removePendingUpload(id: string): void {
+    this.pendingUploads.update((drafts) => drafts.filter((draft) => draft.id !== id));
+  }
+
+  clearPendingUploads(): void {
+    this.pendingUploads.set([]);
+  }
+
+  async uploadPendingFiles(): Promise<void> {
+    if (!this.ticketId) {
+      alert('Primero debés guardar el ticket para poder adjuntar archivos.');
+      return;
+    }
+
+    if (this.pendingUploads().length === 0) {
+      return;
+    }
+
+    this.uploading.set(true);
+    const failedFiles: string[] = [];
+
+    try {
+      for (const draft of this.pendingUploads()) {
+        try {
+          const uploaded = await firstValueFrom(
+            this.attachmentService.uploadAttachment(this.ticketId, draft.file, draft.tag)
+          );
+          this.attachments.update((current) => this.sortAttachments([...current, uploaded]));
+        } catch (error) {
+          console.error('Error al subir archivo:', error);
+          failedFiles.push(draft.file.name);
+        }
+      }
+
+      this.attachmentsChange.emit(this.attachments());
+      if (failedFiles.length === 0) {
+        this.pendingUploads.set([]);
+      } else {
+        this.pendingUploads.update((drafts) => drafts.filter((draft) => failedFiles.includes(draft.file.name)));
+        alert(`No se pudieron subir estos archivos: ${failedFiles.join(', ')}`);
+      }
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
+  async previewFile(attachment: Attachment): Promise<void> {
     if (this.attachmentService.isMockMode()) {
       alert('La previsualización no está disponible en modo mock.');
       return;
     }
 
-    window.open(this.attachmentService.getDownloadUrl(attachment.id), '_blank', 'noopener');
+    try {
+      const fileBlob = await firstValueFrom(this.attachmentService.downloadAttachment(attachment.id));
+      const objectUrl = URL.createObjectURL(fileBlob);
+
+      if (attachment.fileType === 'image' || attachment.fileFormat === 'pdf') {
+        window.open(objectUrl, '_blank', 'noopener,noreferrer');
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        return;
+      }
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = objectUrl;
+      downloadLink.download = attachment.filename;
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    } catch (error) {
+      console.error('Error al descargar archivo:', error);
+      alert(this.extractErrorMessage(error, 'Error al descargar el archivo.'));
+    }
   }
 
   deleteAttachment(attachment: Attachment, event: Event): void {
@@ -119,16 +236,6 @@ export class AttachmentUploaderComponent implements OnChanges {
     });
   }
 
-  formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  }
-
-  formatAttachmentDate(value: string): string {
-    return this.localeDate.formatDateTime(value);
-  }
-
   private loadAttachments(): void {
     if (!this.ticketId) {
       this.attachments.set([]);
@@ -137,8 +244,9 @@ export class AttachmentUploaderComponent implements OnChanges {
 
     this.attachmentService.listAttachments(this.ticketId).subscribe({
       next: (attachments) => {
-        this.attachments.set(attachments);
-        this.attachmentsChange.emit(attachments);
+        const ordered = this.sortAttachments(attachments);
+        this.attachments.set(ordered);
+        this.attachmentsChange.emit(ordered);
       },
       error: (error) => {
         console.error('Error al cargar adjuntos:', error);
@@ -147,49 +255,44 @@ export class AttachmentUploaderComponent implements OnChanges {
     });
   }
 
-  private async handleFiles(files: FileList): Promise<void> {
-    if (!this.ticketId) {
-      alert('Primero debés guardar el ticket para poder adjuntar archivos.');
-      return;
+  private queueFiles(files: FileList): void {
+    const nextDrafts: AttachmentUploadDraft[] = [];
+    const unsupportedFiles: string[] = [];
+
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index];
+
+      if (file.size > this.maxFileSize) {
+        alert(`El archivo ${file.name} excede el tamaño máximo permitido de ${this.maxFileSize / 1024 / 1024} MB.`);
+        continue;
+      }
+
+      const metadata = detectAttachmentMetadata(file.name);
+      if (!metadata || !this.allowedTypes.includes(metadata.fileType)) {
+        unsupportedFiles.push(file.name);
+        continue;
+      }
+
+      nextDrafts.push({
+        id: `${Date.now()}-${index}-${file.name}`,
+        file,
+        fileType: metadata.fileType,
+        fileFormat: metadata.fileFormat,
+        tag: ''
+      });
     }
 
-    this.uploading.set(true);
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+    this.pendingUploads.update((current) => [...current, ...nextDrafts]);
 
-        if (file.size > this.maxFileSize) {
-          alert(`El archivo ${file.name} excede el tamaño máximo permitido de ${this.maxFileSize / 1024 / 1024} MB.`);
-          continue;
-        }
-
-        const fileType = this.getFileType(file);
-        if (!fileType) {
-          alert(`Tipo de archivo no permitido: ${file.name}`);
-          continue;
-        }
-
-        const uploaded = await firstValueFrom(this.attachmentService.uploadAttachment(this.ticketId, file, fileType));
-        this.attachments.update((current) => [...current, uploaded]);
-        this.attachmentsChange.emit(this.attachments());
-      }
-    } catch (error) {
-      console.error('Error al subir archivo:', error);
-      alert(this.extractErrorMessage(error, 'Error al subir el archivo.'));
-    } finally {
-      this.uploading.set(false);
+    if (unsupportedFiles.length > 0) {
+      alert(`Formato no soportado: ${unsupportedFiles.join(', ')}`);
     }
   }
 
-  private getFileType(file: File): AttachmentType | null {
-    const isPdf = file.type === 'application/pdf';
-    const isImage = file.type.startsWith('image/');
-
-    if (isImage && this.allowedTypes.includes('photo')) return 'photo';
-    if (isPdf && this.allowedTypes.includes('contract')) return 'contract';
-    if (isPdf && this.allowedTypes.includes('invoice')) return 'invoice';
-    if ((isPdf || isImage) && this.allowedTypes.includes('other')) return 'other';
-    return null;
+  private sortAttachments(attachments: Attachment[]): Attachment[] {
+    return [...attachments].sort((left, right) =>
+      new Date(right.uploadedAt).getTime() - new Date(left.uploadedAt).getTime()
+    );
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {

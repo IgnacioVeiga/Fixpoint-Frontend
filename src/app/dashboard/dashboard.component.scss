@@ -4,9 +4,46 @@
     gap: 1rem;
 }
 
+.dashboard-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dashboard-source {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 0.8rem;
+    background: var(--surface);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.dashboard-source-fallback {
+    border-color: var(--danger);
+    background: var(--accent-soft);
+    color: var(--danger-strong);
+}
+
+.dashboard-source-mock {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-strong);
+}
+
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 0.85rem;
 }
 
@@ -19,12 +56,13 @@
 }
 
 .stats-card {
+    flex: 1 1 280px;
+    max-width: 340px;
     padding: 0.9rem;
 }
 
 .stats-card h3 {
     margin-bottom: 0.75rem;
-    font-size: 0.98rem;
 }
 
 .status-bars {
@@ -35,7 +73,7 @@
 
 .status-bar {
     display: grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 110px 1fr;
     gap: 0.5rem;
     align-items: center;
 }
@@ -97,6 +135,7 @@
     height: 8px;
     border-radius: 50%;
     background: var(--primary);
+    transform: translate(-50%, 50%);
 }
 
 .x-axis {
@@ -111,7 +150,8 @@
     display: none;
 }
 
-.client-list {
+.client-list,
+.parts-list {
     display: flex;
     flex-direction: column;
     gap: 0.45rem;
@@ -131,6 +171,32 @@
     color: var(--text-muted);
 }
 
+.part-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.part-item-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+}
+
+.part-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    overflow: hidden;
+}
+
+.part-bar-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
 .file-explorer {
     padding: 0.9rem;
 }
@@ -144,13 +210,13 @@
     gap: 0.6rem;
 }
 
-.header-top h2 {
-    font-size: 1.1rem;
-}
-
 .toggle-view-btn,
 .file-types button,
 .view-toggle button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
@@ -164,9 +230,16 @@
     color: var(--primary);
 }
 
+.toggle-view-btn .btn-shortcut {
+    border-color: var(--border);
+    background: var(--surface-soft);
+    color: var(--text-muted);
+}
+
 .file-types,
 .view-toggle {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.35rem;
 }
 
@@ -178,7 +251,7 @@
 
 .search-box {
     flex: 1;
-    min-width: 200px;
+    min-width: 220px;
 }
 
 .breadcrumbs {
@@ -209,7 +282,7 @@
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
-    padding: 0.55rem;
+    padding: 0.65rem;
     cursor: pointer;
 }
 
@@ -218,36 +291,50 @@
 }
 
 .folder-icon {
-    font-size: 1.35rem;
+    color: var(--primary-strong);
 }
 
-.files-container.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 0.5rem;
-}
-
-.files-container.list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 0.58rem;
-}
-
-.file-icon {
-    font-size: 1.1rem;
-}
-
-.file-name {
-    font-weight: 700;
-}
-
-.file-meta {
-    font-size: 0.8rem;
+.empty-state {
     color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .folder-item:hover,
+    .file-item:hover {
+        border-color: var(--primary);
+        background: var(--table-row-hover);
+    }
+}
+
+@media (pointer: coarse) {
+    .toggle-view-btn,
+    .file-types button,
+    .view-toggle button,
+    .folder-item,
+    .file-item {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 1100px) {
+    .stats-card {
+        max-width: none;
+    }
+}
+
+@media (max-width: 800px) {
+    .dashboard-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats-card {
+        flex-basis: 100%;
+    }
+
+    .status-bar {
+        grid-template-columns: 1fr;
+    }
+
 }

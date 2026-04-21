@@ -1,125 +1,76 @@
-# Copilot Instructions for Fixpoint Project (Frontend + Backend)
+# LLM Coding Instructions - Fixpoint Frontend
 
-## 🧠 Descripción general del sistema
+This file is machine-oriented guidance for code generation and edits in `Fixpoint-Frontend`.
+Human onboarding and product documentation are in `docs/`.
 
-Fixpoint es un sistema de gestión de reparaciones pensado para talleres de electrónica y electrodomésticos. Permite llevar el control de:
-- Tickets de reparación
-- Clientes
-- Inventario de piezas y herramientas
-- Historial técnico y uso de componentes
-- Contratos, documentos y archivos adjuntos
+## 1. Repository Identity
 
-Actualmente se encuentra en desarrollo activo y está compuesto por dos proyectos separados:
-- **Frontend**: Angular 20 (SPA), ubicado en `Fixpoint-Frontend/`
-- **Backend**: Spring Boot 3.5.4 + PostgreSQL, ubicado en `Fixpoint-Backend/`
+- Stack: Angular 20, standalone components, zoneless change detection.
+- App type: SPA for workshop operations (clients, tickets, inventory, attachments, dashboard).
+- Environments: `dev`, `qa`, `prod`, `mock` (compile-time via `src/environments/environment*.ts`).
+- CI trigger: runs on commits to `main` (`.github/workflows/ci.yml`).
 
----
+## 2. Non-Negotiable Constraints
 
-## 🌐 Frontend: Angular 20 (SPA)
+- Keep auth tokens out of `localStorage` and `sessionStorage`.
+  - Exception already in code: UI theme preference storage only.
+- Keep `withCredentials: true` for backend API communication.
+- Do not introduce runtime `.env` usage in frontend.
+- Do not reintroduce Angular module-based architecture (`@NgModule`).
+- Do not break backend contract for auth endpoints and payload shape.
 
-### 🧱 Estructura general
+## 3. Architecture and Conventions
 
-- Código en `src/app/`, dividido por dominios: `clients/`, `inventory/`, `tickets/`, `dashboard/`, etc.
-- Los formularios viven en subcarpetas `*-form/` con componentes como `client-form.component.ts`.
-- Modelos de datos están en `src/app/models/` y usan interfaces TypeScript (`.model.ts`).
-- Las rutas están definidas en `app.routes.ts`.
+- Routing source of truth: `src/app/app.routes.ts`.
+  - `/login` uses `guestGuard`.
+  - business routes use `authGuard`.
+- Auth bootstrap: `APP_INITIALIZER` in `src/app/app.config.ts` calls `AuthService.initializeSession()`.
+- HTTP abstraction:
+  - `src/app/service/generic-api.service.ts`
+  - `src/app/service/api.service.ts` (facade for backward compatibility)
+- Auth flow implementation:
+  - `src/app/service/auth.service.ts`
+  - `src/app/service/auth.interceptor.ts`
+  - `src/app/service/auth-session.service.ts`
+- Feature layout is domain-based under `src/app/`.
 
-### ✅ Convenciones
+## 4. UI and Language Rules
 
-- El código debe estar en inglés.
-- El contenido visible de la app (HTML, labels, formularios) debe estar en español.
-- Cada componente tiene su propio archivo `.html`, `.ts` y `.scss`.
-- Usar siempre la sintaxis moderna de Angular 20 (Signal-based inputs, Standalone Components, @if() y @for()).
-- Evitar `ngOnInit()` innecesarios si se puede usar `constructor()` o signals.
-- Al crear nuevos formularios, respetar la estructura de `<dominio>-form/` y nombrar como `xxx-form.component.ts`.
-- No repetir clases scss si es posible, buscar un archivo mejor donde ubicarlos.
-- Este proyecto fue generado sin el antiguo `zone.js`.
+- Keep source code identifiers and comments in English.
+- Keep user-facing text consistent with existing UI language (currently mostly Spanish).
+- Preserve existing UX behavior unless change request explicitly includes UX redesign.
 
-### 🚀 Flujo de desarrollo
+## 5. Environment Rules
 
-- `npm start` o `ng serve` para entorno local.
-- `ng build` para compilar en producción.
-- `ng test` para tests unitarios (Karma + Jasmine).
+- `dev`, `qa`, `prod` must target real backend integration (`useMockApi: false`).
+- `mock` is frontend-only fallback mode (`useMockApi: true`).
+- `prod` commonly uses relative API base URL (`/api/v1`) for reverse-proxy deployment.
 
----
+## 6. Change Policy for LLMs
 
-## 🛠️ Backend: Spring Boot 3.5 + PostgreSQL
+- Prefer minimal, localized changes over large rewrites.
+- Reuse existing services and models before creating new abstractions.
+- Preserve strict typing; avoid `any` unless unavoidable.
+- Add/update unit tests when behavior changes.
+- If changing API request/response shape, also update:
+  - frontend models
+  - affected service/interceptor tests
+  - relevant docs in `docs/`
 
-### 📦 Estructura modular
+## 7. Test and Verification
 
-El código está dividido en paquetes por dominio:
-´´´
-com.fixpoint.dominio/
-├── controller/
-├── dto/
-├── entity/
-├── repository/
-├── service/
-´´´
+- Default checks:
+  - `npm run test:ci`
+  - `npm run build`
+- In CI, Chrome is launched through a wrapper with sandbox-related flags.
+  - Keep `.github/workflows/ci.yml` aligned with runner constraints.
 
-Entre los dominios se incluyen unos como: `clients`, `tickets`, `inventory`, `ticketlogs`, `ticketparts`, `attachments`.
+## 8. Files LLMs Should Read First
 
-### 📌 Lógica de negocio implementada
-
-- Cada ticket está asociado a un cliente.
-- Un ticket puede tener:
-  - Logs técnicos (`ticketlogs`)
-  - Partes usadas (`ticketparts`)
-  - Archivos adjuntos (`attachments`)
-- El inventario gestiona piezas físicas, que se pueden asociar a reparaciones.
-- El sistema debe permitir ver el historial técnico completo de un aparato.
-- Todos los endpoints son REST y devuelven DTOs, no entidades directas.
-
-### ⚠️ Consideraciones técnicas
-
-- Usar DTOs para exponer datos. No exponer entidades JPA crudas.
-- Validar entradas con `jakarta.validation`.
-- Usar anotaciones como `@Service`, `@RestController`, `@Builder`, `@Repository`.
-- Si el servicio es trivial, podés omitir la interfaz, pero preferimos mantener `ServiceImpl`.
-
----
-
-## 🧠 Instrucciones específicas para agentes AI
-
-- ⚠️ Angular 20 usa **Standalone Components**. Evitar ejemplos con `@NgModule`.
-- Evitar `FormBuilder` si se puede tipar explícitamente los formularios.
-- Evitar los antiguos `*ngIf`/`*ngFor`, ahora se usan @if() y @for().
-- Usar `ReactiveFormsModule` para todos los formularios.
-- Las clases deben respetar PascalCase en nombres y camelCase en propiedades.
-- Los servicios deben llamarse `XService` y estar en `/service/`, implementando su interfaz si corresponde.
-- Al crear un nuevo módulo, agregar carpeta por dominio con estructura completa (`controller`, `dto`, `entity`, `service`, etc.).
-- Para nuevas rutas, recordar actualizar `app.routes.ts`.
-- Al subir archivos, usá `FormData` y `HttpClient.post(...)`, y registrá el archivo en la entidad `Attachment`.
-
----
-
-## 📂 Archivos clave
-
-- `src/app/models/*.model.ts` → Interfaces de datos del frontend
-- `src/styles.scss` → Estilos globales
-- `src/app/app.routes.ts` → Enrutamiento de Angular
-- `src/app/dashboard/` → Componente raíz y vista principal
-
----
-
-## 📜 Idiomas y estándares
-
-- El frontend se presenta al usuario en español.
-- El código fuente (nombres de clases, variables, servicios) está en inglés.
-- Se busca un código limpio, moderno y mantenible. No se requiere documentación exhaustiva inline, pero sí legibilidad.
-- Las IAs deben evitar sugerir código obsoleto o basado en Angular <15 o Spring Boot <3.
-
----
-
-## ⏳ Estado del desarrollo
-
-- ✅ Clientes
-- ✅ Tickets
-- ✅ Ticket Logs
-- ✅ Ticket Parts
-- ✅ Inventory
-- ✅ Attachments
-- 🔜 Contratos, archivos firmados, facturación y offline sync
-
-## Importante
-- Estas instrucciones son usadas tanto en el Frontend como en el Backend, tener en cuenta que proyecto estamos trabajando para dar prioridad a las instrucciones que correspondan.
+- `README.md`
+- `docs/PROJECT_MAP.md`
+- `docs/ENVIRONMENTS.md`
+- `docs/API_CONTRACT.md`
+- `docs/AUTH_FLOW.md`
+- `src/app/app.config.ts`
+- `src/app/app.routes.ts`

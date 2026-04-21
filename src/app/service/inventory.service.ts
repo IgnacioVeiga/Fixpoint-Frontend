@@ -12,7 +12,7 @@ export class InventoryService {
   private readonly endpoint = 'inventory';
 
   listInventory(): Observable<InventoryItem[]> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       return of(MOCK_INVENTORY);
     }
 
@@ -22,7 +22,7 @@ export class InventoryService {
   }
 
   getInventory(id: number): Observable<InventoryItem> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const item = MOCK_INVENTORY.find((inventory) => inventory.id === id);
       if (!item) {
         return throwError(() => new Error('Item no encontrado'));
@@ -36,7 +36,7 @@ export class InventoryService {
   }
 
   createInventory(item: SaveInventoryRequest): Observable<InventoryItem> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const mockItem: InventoryItem = {
         ...item,
         id: MOCK_INVENTORY.length + 1,
@@ -52,7 +52,7 @@ export class InventoryService {
   }
 
   updateInventory(id: number, item: SaveInventoryRequest): Observable<InventoryItem> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_INVENTORY.findIndex((inventory) => inventory.id === id);
       if (index < 0) {
         return throwError(() => new Error('Item no encontrado'));
@@ -73,7 +73,7 @@ export class InventoryService {
   }
 
   deleteInventory(id: number): Observable<void> {
-    if (environment.useMockFallback) {
+    if (environment.useMockApi) {
       const index = MOCK_INVENTORY.findIndex((inventory) => inventory.id === id);
       if (index < 0) {
         return throwError(() => new Error('Item no encontrado'));

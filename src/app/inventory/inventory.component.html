@@ -9,7 +9,10 @@
       </p>
     }
   </div>
-  <a [routerLink]="'/inventario/nuevo'" class="btn">+ Nuevo componente</a>
+  <a [routerLink]="'/inventario/nuevo'" class="btn" aria-keyshortcuts="Alt+N" title="Alt+N">
+    <span class="btn-label">+ Nuevo componente</span>
+    <span class="btn-shortcut" aria-hidden="true">Alt+N</span>
+  </a>
 </section>
 
 <section class="table-card">

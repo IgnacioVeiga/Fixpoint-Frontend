@@ -6,6 +6,8 @@ import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../service/auth.service';
 import { environment } from '../../../environments/environment';
 
+const APP_USER_USERNAME_MAX_LENGTH = 100;
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -19,13 +21,14 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  readonly mockMode = environment.useMockFallback;
+  readonly usernameMaxLength = APP_USER_USERNAME_MAX_LENGTH;
+  readonly mockMode = environment.useMockApi;
   readonly environmentName = environment.name.toUpperCase();
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
 
   readonly form = this.formBuilder.nonNullable.group({
-    username: ['', Validators.required],
+    username: ['', [Validators.required, Validators.maxLength(APP_USER_USERNAME_MAX_LENGTH)]],
     password: ['', Validators.required],
     rememberMe: [false]
   });

@@ -33,7 +33,7 @@
     --status-returned-text: #1f5e60;
     --status-cancelled-bg: #f3d9e6;
     --status-cancelled-text: #6c2f50;
-    --radius: 12px;
+    --radius: 0px;
 }
 
 :root[data-theme='dark'] {
@@ -88,9 +88,17 @@ body {
 body {
     font-family: "IBM Plex Sans", "Trebuchet MS", "Segoe UI", sans-serif;
     color: var(--text);
-    background:
-        radial-gradient(circle at 0% 0%, var(--bg-radial) 0%, transparent 52%),
-        linear-gradient(150deg, var(--bg-soft), var(--bg));
+    background: var(--bg);
+    background-image: none;
+}
+
+body,
+body * {
+    border-radius: 0;
+    backdrop-filter: none;
+    backdrop-filter: none;
+    background-image: none !important;
+    filter: none !important;
 }
 
 h1,
@@ -139,7 +147,7 @@ p {
 }
 
 .badge {
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0.2rem 0.55rem;
     font-size: 0.78rem;
     font-weight: 700;
@@ -173,7 +181,7 @@ p {
 
 .theme-toggle {
     border: 1px solid var(--primary);
-    border-radius: 999px;
+    border-radius: 0;
     background: transparent;
     color: var(--primary-strong);
     padding: 0.22rem 0.68rem;
@@ -194,7 +202,7 @@ p {
 .session-btn,
 .session-link {
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 0;
     background: transparent;
     color: var(--text);
     padding: 0.22rem 0.68rem;
@@ -218,7 +226,8 @@ p {
     padding: 0.65rem 1rem;
     background: var(--nav-bg);
     border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(3px);
+    backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 .main-nav a {
@@ -226,7 +235,7 @@ p {
     align-items: center;
     gap: 0.35rem;
     text-decoration: none;
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0.42rem 0.9rem;
     font-size: 0.92rem;
     color: var(--text);
@@ -317,7 +326,7 @@ select,
 textarea {
     width: 100%;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 0;
     background: var(--surface-soft);
     padding: 0.56rem 0.66rem;
     font-size: 0.95rem;
@@ -351,7 +360,7 @@ form {
     gap: 1rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 0;
     padding: 1.15rem;
     box-shadow: var(--shadow);
 }
@@ -365,7 +374,7 @@ form {
 .table-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 0;
     box-shadow: var(--shadow);
     padding: 0.9rem;
     overflow-x: auto;
@@ -412,7 +421,7 @@ tbody tr:last-child td {
     justify-content: center;
     gap: 0.3rem;
     border: none;
-    border-radius: 10px;
+    border-radius: 0;
     padding: 0.55rem 0.88rem;
     text-decoration: none;
     font-weight: 700;
@@ -432,7 +441,7 @@ tbody tr:last-child td {
     justify-content: center;
     min-width: 3.25rem;
     padding: 0.14rem 0.42rem;
-    border-radius: 999px;
+    border-radius: 0;
     border: 1px solid rgba(255, 255, 255, 0.26);
     background: rgba(255, 255, 255, 0.12);
     color: inherit;
@@ -465,7 +474,7 @@ tbody tr:last-child td {
 
 .delete-btn {
     border: none;
-    border-radius: 8px;
+    border-radius: 0;
     background: var(--danger);
     color: var(--bg);
     padding: 0.35rem 0.6rem;
@@ -480,7 +489,7 @@ tbody tr:last-child td {
 .status-pill {
     display: inline-flex;
     padding: 0.24rem 0.5rem;
-    border-radius: 999px;
+    border-radius: 0;
     font-size: 0.76rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -538,7 +547,7 @@ tbody tr:last-child td {
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    border-radius: 10px;
+    border-radius: 0;
     border: 1px solid var(--border);
     background: var(--surface-soft);
     color: var(--text-muted);
@@ -555,7 +564,7 @@ tbody tr:last-child td {
 
 .btn-inline {
     border: 1px solid currentColor;
-    border-radius: 8px;
+    border-radius: 0;
     background: transparent;
     color: inherit;
     font-size: 0.82rem;
@@ -592,7 +601,7 @@ tbody tr:last-child td {
 
 .form-section-block {
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 0;
     background: var(--surface-soft);
     padding: 1rem;
 }
@@ -670,7 +679,7 @@ tbody tr:last-child td {
 .field-chip {
     display: inline-flex;
     align-items: center;
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0.18rem 0.5rem;
     font-size: 0.74rem;
     background: var(--surface);
@@ -713,7 +722,7 @@ tbody tr:last-child td {
 .dashboard .storage-source {
     display: inline-flex;
     align-items: center;
-    border-radius: 999px;
+    border-radius: 0;
     padding: 0.18rem 0.48rem;
     background: var(--surface-soft);
     color: var(--text-muted);
@@ -740,15 +749,15 @@ tbody tr:last-child td {
 
 .dashboard .storage-progress {
     height: 10px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface-soft);
     overflow: hidden;
 }
 
 .dashboard .storage-progress-bar {
     height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 0;
+    background: var(--primary);
 }
 
 .dashboard .storage-meta {
@@ -804,7 +813,7 @@ tbody tr:last-child td {
 .dashboard .file-thumbnail {
     width: 100%;
     aspect-ratio: 16 / 10;
-    border-radius: 10px;
+    border-radius: 0;
     overflow: hidden;
     background: var(--surface-soft);
     border: 1px solid rgba(19, 122, 127, 0.14);
@@ -839,7 +848,7 @@ tbody tr:last-child td {
 .dashboard .file-badge {
     display: inline-flex;
     align-items: center;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface-soft);
     padding: 0.15rem 0.45rem;
     font-size: 0.74rem;

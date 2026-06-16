@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
@@ -15,14 +15,13 @@ const APP_USER_USERNAME_MAX_LENGTH = 100;
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
   readonly usernameMaxLength = APP_USER_USERNAME_MAX_LENGTH;
-  readonly mockMode = environment.useMockApi;
   readonly environmentName = environment.name.toUpperCase();
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -32,6 +31,16 @@ export class LoginComponent {
     password: ['', Validators.required],
     rememberMe: [false]
   });
+
+  ngOnInit(): void {
+    if (this.environmentName === 'MOCK') {
+      this.form.setValue({
+        username: 'admin',
+        password: 'admin123456',
+        rememberMe: true
+      });
+    }
+  }
 
   submit(): void {
     if (this.form.invalid || this.submitting()) {

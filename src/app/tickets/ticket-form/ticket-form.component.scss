@@ -10,7 +10,6 @@
 .ticket-section {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
   padding: 1rem;
   box-shadow: var(--shadow);
 }
@@ -35,5 +34,12 @@
 
   .ticket-section-full {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1000px) {
+  .ticket-sections {
+    display: flex;
+    flex-direction: column;
   }
 }

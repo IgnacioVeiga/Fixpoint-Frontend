@@ -8,7 +8,6 @@
   width: min(440px, 100%);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
   box-shadow: var(--shadow);
   padding: 1.3rem;
   display: grid;
@@ -45,12 +44,6 @@
   width: 1rem;
   height: 1rem;
   accent-color: var(--accent-primary);
-}
-
-.auth-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
 }
 
 @media (max-width: 640px) {

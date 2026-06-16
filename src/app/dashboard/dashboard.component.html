@@ -4,15 +4,6 @@
             <h1>Panel operativo</h1>
             <p class="page-subtitle">Resumen de tickets, clientes y archivos con datos reales cuando estan disponibles.</p>
         </div>
-        @if (source() !== 'api') {
-            <div class="dashboard-source" [class.dashboard-source-fallback]="source() === 'fallback'" [class.dashboard-source-mock]="source() === 'mock'">
-                @if (source() === 'fallback') {
-                <span>Fallback local</span>
-                } @else {
-                    <span>Modo mock</span>
-                }
-            </div>
-        }
     </section>
 
     @if (sourceMessage()) {

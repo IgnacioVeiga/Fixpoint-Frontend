@@ -36,3 +36,10 @@
     grid-column: 1 / -1;
   }
 }
+
+@media (max-width: 1000px) {
+  .ticket-sections {
+    display: flex;
+    flex-direction: column;
+  }
+}

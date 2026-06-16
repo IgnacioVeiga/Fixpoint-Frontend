@@ -46,12 +46,6 @@
   accent-color: var(--accent-primary);
 }
 
-.auth-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
 @media (max-width: 640px) {
   .auth-shell {
     min-height: auto;

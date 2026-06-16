@@ -43,12 +43,5 @@
         {{ submitting() ? 'Signing in...' : 'Sign in' }}
       </button>
     </form>
-
-    <footer class="auth-footer">
-      <span class="badge badge-env">{{ environmentName }}</span>
-      <span class="badge" [class.badge-mock]="mockMode" [class.badge-real]="!mockMode">
-        {{ mockMode ? 'Mock mode' : 'Backend mode' }}
-      </span>
-    </footer>
   </article>
 </section>

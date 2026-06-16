@@ -11,28 +11,6 @@
     gap: 1rem;
 }
 
-.dashboard-source {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid var(--border);
-    padding: 0.4rem 0.8rem;
-    background: var(--surface);
-    font-size: 0.82rem;
-    font-weight: 700;
-}
-
-.dashboard-source-fallback {
-    border-color: var(--danger);
-    background: var(--accent-soft);
-    color: var(--danger-strong);
-}
-
-.dashboard-source-mock {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-    color: var(--primary-strong);
-}
-
 .stats-grid {
     display: flex;
     flex-direction: column;
